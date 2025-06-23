@@ -5,7 +5,7 @@ def limpiar_consola():
     os.system("cls")
 
 def pausaPorConsola():
-    print("Presiona ENTER para continuar, o ESC para salir...")
+    print("\n\n\nPresiona ENTER para continuar, o ESC para salir...")
 
     while True:
         key = msvcrt.getch()
