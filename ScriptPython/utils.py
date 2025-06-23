@@ -37,6 +37,15 @@ def ver_fotos_en_came(session):
             session.findById("wnd[1]").close()
             session.findById("wnd[0]/shellcont").close()
 
+def ver_fotos_en_came_tecno(session):
+    session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
+    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
+    time.sleep(0.3)
+    session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").currentCellColumn = "NOMBRE"
+    session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").doubleClickCurrentCell()
+    session.findById("wnd[1]").close()
+    session.findById("wnd[0]/shellcont").close()
+
 def entrar_a_care(session):
     campo = session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/subMAINORDER:SAPLCOIH:0152/ctxtCAUFVD-MAUFNR")
     campo.setFocus()

@@ -1,23 +1,29 @@
-from cerrarpestanias import cerrar_pestanas_chrome
-from utils import *
-from sap_connection import obtener_session_sap
+from scripts import *
+from pausa import limpiar_consola
 
-def main():\
+def mostrar_menu():
+    print("\n---MENU ---")
+    print("1. General")
+    print("2. Tecnovias")
+    print("3. Salir")
 
-    session = obtener_session_sap()
-    ingreso_a_came(session)
-    ver_fotos_en_came(session)
-    entrar_a_care(session)
-    ver_fotos_en_care(session)
-    entrar_a_aviso(session)
-    pausa()
-    aceptar_g02(session)
-    pausa()
-    aceptar_itemizado(session)
-    pausa()
-    aceptar_medicion(session)
-    cgi(session)
-    cerrar_pestanas_chrome()
+def main():
+
+    while True:
+        limpiar_consola()
+        mostrar_menu()
+        opcion = input("Opcion?\n")
+
+        if opcion == "g" or opcion == "1":
+            flujo_general()
+        elif opcion == "t" or opcion == "2":
+            flujo_tecnovias()
+        elif opcion == "3" or opcion == "salir":
+            print("Saliendo...")
+            break
+        else:
+            print("es 1 o 2, pelotudo")
+            
 
 if __name__ == "__main__": 
     main()

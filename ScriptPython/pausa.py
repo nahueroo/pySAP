@@ -1,4 +1,8 @@
 import msvcrt
+import os
+
+def limpiar_consola():
+    os.system("cls")
 
 def pausaPorConsola():
     print("Presiona ENTER para continuar, o ESC para salir...")
