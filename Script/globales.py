@@ -1,0 +1,59 @@
+
+
+datos = {
+    "Texto Breve" : None,
+    "Clase de actividad" : None,
+    "Ubicacion Tecnica" : None,
+    "Ubicacion Aviso" : None,
+    "Clase de actividad aviso" : None,
+    "Tipo Aviso" : None,
+    "Autor Aviso" : None,
+    "Fecha Aviso" : None,
+    "Servicio" : None,
+}
+
+def esperar_elemento(session, elemento_id, timeout=5):
+    # Espera hasta que el elemento esté disponible
+
+    import time
+    tiempo_inicial = time.time()
+
+    while time.time() - tiempo_inicial < timeout:
+        try:
+            # Intenta encontrar el elemento
+            elemento = session.findById(elemento_id)
+            if elemento:
+                # Si lo encuentra
+                return True
+        except:
+            time.sleep(0.1)  # Espera un porquito antes de volver a intentar
+    
+    # Si llego aqui, se agota el timeout
+    print(f"Timeout: el elemento {elemento_id} no se encontró en {timeout} segundos.")
+    return False  # No se encontró el elemento en el tiempo dado
+
+def esperar_cierre_ventana(session, numero_ventana, timeout=5):
+    # Espera hasta que la ventana se cierre
+    import time
+    tiempo_inicial = time.time()
+
+    while time.time() - tiempo_inicial < timeout:
+        if session.Children.Count <= numero_ventana:
+            return True
+        time.sleep(0.1)  # Espera un poco antes de volver a intentar
+    
+    print(f"Timeout: la ventana {numero_ventana} no se cerró en {timeout} segundos.")
+    return False  # La ventana sigue abierta después del timeout    
+
+def esperar_popup(session, timeout=5):
+    # Espera hasta que aparezca un popup
+
+    import time
+    tiempo_inicial = time.time()
+
+    while time.time() - tiempo_inicial < timeout:
+        if session.Children.Count > 1: # Hay popup
+            return True
+        time.sleep(0.1)
+
+    return False

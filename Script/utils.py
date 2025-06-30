@@ -2,7 +2,7 @@ import time
 import pyautogui
 from pausa import pausaPorConsola
 from getters import *
-from globales import datos
+from globales import datos, esperar_elemento, esperar_cierre_ventana, esperar_popup
 
 #entrar a came seleccionada desde IW38
 
@@ -19,38 +19,39 @@ def ver_fotos_en_came(session):
     
     #Abre Visualizar imagenes
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
-    time.sleep(0.5)
-
-    if session.Children.Count > 1:
+    
+    # Espera inteligente a que aparezca el popup
+    if esperar_popup(session, timeout=3):
         # presiona el botón Aceptar en el popup
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
         
         # abre Lista de documentos
         session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
-        time.sleep(0.3)
-
-        if session.Children.Count > 1:
+        
+        # Espera inteligente a que aparezca el popup
+        if esperar_popup(session, timeout=3):
             # presiona el botón Aceptar en el popup
             session.findById("wnd[1]/tbar[0]/btn[0]").press()
 
             session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
-            time.sleep(0.3)
-
-            session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").currentCellColumn = "NOMBRE"
-
-            session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").doubleClickCurrentCell()
-
-            session.findById("wnd[1]").close()
-            session.findById("wnd[0]/shellcont").close()
+            
+            # Espera a que aparezca la ventana con la grid
+            if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
+                session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").currentCellColumn = "NOMBRE"
+                session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").doubleClickCurrentCell()
+                session.findById("wnd[1]").close()
+                session.findById("wnd[0]/shellcont").close()
 
 def ver_fotos_en_came_tecno(session):
     session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
-    time.sleep(0.3)
-    session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").currentCellColumn = "NOMBRE"
-    session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").doubleClickCurrentCell()
-    session.findById("wnd[1]").close()
-    session.findById("wnd[0]/shellcont").close()
+    
+    # Espera a que aparezca la ventana con la grid
+    if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
+        session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").currentCellColumn = "NOMBRE"
+        session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell").doubleClickCurrentCell()
+        session.findById("wnd[1]").close()
+        session.findById("wnd[0]/shellcont").close()
 
 def entrar_a_care(session):
     campo = session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/subMAINORDER:SAPLCOIH:0152/ctxtCAUFVD-MAUFNR")
@@ -66,9 +67,9 @@ def ver_fotos_en_care(session):
     session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(0).selected = True
     session.findById("wnd[1]").sendVKey(0)
 
-    time.sleep(0.3)
-
-    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
+    # Espera a que se procese la selección
+    if esperar_elemento(session, "wnd[0]/shellcont/shell", timeout=3):
+        session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
 
     if session.Children.Count > 1:
         # presiona el botón Aceptar en el popup
@@ -85,33 +86,36 @@ def ver_fotos_en_care(session):
     session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(1).selected = True
     session.findById("wnd[1]").sendVKey(0)
     session.findById("wnd[0]/shellcont[1]/shell").pressButton("VIEW_IMAG")
-    time.sleep(0.3)
-
-    if session.Children.Count > 1:
+    
+    # Espera inteligente a que aparezca el popup
+    if esperar_popup(session, timeout=3):
         # presiona el botón Aceptar en el popup
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
 
         # abre Lista de documentos
         session.findById("wnd[0]/shellcont[1]/shell").pressButton("DOC_LIST")
-        time.sleep(0.3)
-
-        if session.Children.Count > 1:
+        
+        # Espera inteligente a que aparezca el popup
+        if esperar_popup(session, timeout=3):
             # presiona el botón Aceptar en el popup
             session.findById("wnd[1]/tbar[0]/btn[0]").press()
 
 def entrar_a_aviso(session):
     session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/btnICON_NTF").press()
-    time.sleep(0.5)
-    datos["Tipo Aviso"] = get_aviso_tipo(session)
-    datos["Autor Aviso"] = get_aviso_autor(session)
-    datos["Fecha Aviso"] = get_aviso_fecha(session)
-    datos["Servicio"] = get_aviso_servicio(session)
+    
+    # Espera a que se abra el aviso
+    if esperar_elemento(session, "wnd[0]/usr/subSCREEN_1:SAPLIQS0:1050/subNOTIF_TYPE:SAPLIQS0:1051/ctxtVIQMEL-QMART", timeout=3):
+        datos["Tipo Aviso"] = get_aviso_tipo(session)
+        datos["Autor Aviso"] = get_aviso_autor(session)
+        datos["Fecha Aviso"] = get_aviso_fecha(session)
+        datos["Servicio"] = get_aviso_servicio(session)
 
 def aceptar_g02(session):
     session.findById("wnd[0]/tbar[0]/btn[3]").press()
-    time.sleep(0.5)
-
-    session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
+    
+    # Espera a que se procese y luego selecciona la pestaña
+    if esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=3):
+        session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
 
 def pausa():
     exit_code = pausaPorConsola()
@@ -121,25 +125,30 @@ def pausa():
         print("Pausa termino con 1, deteniendo")
         exit(1)
     else:
-        print("Codigo de salida inesperado: {exit_code}")
+        print(f"Codigo de salida inesperado: {exit_code}")
         exit(exit_code)
 
 def aceptar_itemizado(session):
     session.findById("wnd[0]/tbar[0]/btn[3]").press()
-    time.sleep(0.5)
-
-    session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
-    time.sleep(2)
+    
+    # Espera a que se procese y luego selecciona la pestaña
+    if esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=3):
+        session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
+        # Espera adicional para que se cargue completamente
+        esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=2)
 
 def aceptar_medicion(session):
-    session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpIHKZ").select()
-    time.sleep(0.25)
+    # Espera a que la pestaña esté disponible y la selecciona
+    if esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpIHKZ", timeout=3):
+        session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpIHKZ").select()
 
 def cgi(session):
     session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/ctxtCAUFVD-INGPR").text = "Cgi"
     session.findById("wnd[0]/tbar[0]/btn[11]").press()
-    time.sleep(0.5)
-    pyautogui.press('down')
+    
+    # Espera un poco antes de enviar la tecla
+    if esperar_elemento(session, "wnd[0]", timeout=2):
+        pyautogui.press('down')
 
 def mostrar_datos():
     print("\n-----CAME-----\n")

@@ -1,4 +1,4 @@
-from scripts import *
+from scripts import flujo_general, flujo_tecnovias
 from pausa import limpiar_consola
 from globales import datos
 
@@ -23,7 +23,7 @@ def main():
             print("Saliendo...")
             break
         else:
-            print("es 1 o 2, pelotudo")
+            print("Opcion invalida")
             
 
 if __name__ == "__main__": 
