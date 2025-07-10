@@ -1,5 +1,3 @@
-
-
 datos = {
     "Texto Breve" : None,
     "Clase de actividad" : None,
@@ -29,7 +27,6 @@ def esperar_elemento(session, elemento_id, timeout=5):
             time.sleep(0.1)  # Espera un porquito antes de volver a intentar
     
     # Si llego aqui, se agota el timeout
-    print(f"Timeout: el elemento {elemento_id} no se encontró en {timeout} segundos.")
     return False  # No se encontró el elemento en el tiempo dado
 
 def esperar_cierre_ventana(session, numero_ventana, timeout=5):
@@ -42,7 +39,7 @@ def esperar_cierre_ventana(session, numero_ventana, timeout=5):
             return True
         time.sleep(0.1)  # Espera un poco antes de volver a intentar
     
-    print(f"Timeout: la ventana {numero_ventana} no se cerró en {timeout} segundos.")
+    # Si llego aqui, se agota el timeout
     return False  # La ventana sigue abierta después del timeout    
 
 def esperar_popup(session, timeout=5):

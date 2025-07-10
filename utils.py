@@ -116,6 +116,8 @@ def aceptar_g02(session):
     # Espera a que se procese y luego selecciona la pestaña
     if esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=3):
         session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
+        ltxa1_care, arbei_care = getter_care(session)
+        print(f"{ltxa1_care},       {arbei_care}")
 
 def pausa():
     exit_code = pausaPorConsola()
@@ -136,6 +138,8 @@ def aceptar_itemizado(session):
         session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
         # Espera adicional para que se cargue completamente
         esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=2)
+        ltxa1_came, dauno_came = getter_came(session)
+        print(f"{ltxa1_came},       {dauno_came}")
 
 def aceptar_medicion(session):
     # Espera a que la pestaña esté disponible y la selecciona

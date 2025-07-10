@@ -6,8 +6,7 @@ def get_textoBreve(session):
             "subSUB_KOPF:SAPLCOIH:1102/txtCAUFVD-KTEXT"
     try:
         return session.findById(ruta).text
-    except Exception as e:
-        print(f"[ERROR] Texto Breve: {e}")
+    except Exception:
         return None
     
 def get_gPlanificador(session):
@@ -49,8 +48,7 @@ def get_UT(session):
     )
     try:
         return session.findById(ruta).text
-    except Exception as e:
-        print(f"[ERROR] Ubicación técnica: {e}")
+    except Exception:
         return None
     
 def get_aviso(session):
@@ -81,8 +79,7 @@ def get_aviso_tipo(session):
     )
     try:
         return session.findById(ruta).text
-    except Exception as e:
-        print(f"[ERROR] Tipo de notificación: {e}")
+    except Exception:
         return None
     
 def get_aviso_autor(session):
@@ -121,3 +118,37 @@ def get_aviso_servicio(session):
     except Exception as e:
         print(f"[ERROR] Texto aviso: {e}")
         return None
+
+def getter_care(session):
+    """Obtiene todos los valores válidos de los campos LTXA1 y ARBEI de la operación actual."""
+    ltxa1_list = []
+    arbei_list = []
+    row = 0
+    while True:
+        try:
+            ltxa1 = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-LTXA1[7,{row}]").text
+            arbei = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-ARBEI[10,{row}]").text
+            if ltxa1.strip() and not ltxa1.startswith("_") and ltxa1 != "":
+                ltxa1_list.append(ltxa1)
+                arbei_list.append(arbei)
+            row += 1
+        except Exception:
+            break
+    return ltxa1_list, arbei_list
+
+def getter_came(session):
+    """Obtiene todos los valores válidos de los campos LTXA1 y DAUNO de la operación actual."""
+    ltxa1_list = []
+    dauno_list = []
+    row = 0
+    while True:
+        try:
+            ltxa1 = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-LTXA1[7,{row}]").text
+            dauno = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-DAUNO[13,{row}]").text
+            if ltxa1.strip() and not ltxa1.startswith("_") and ltxa1 != "":
+                ltxa1_list.append(ltxa1)
+                dauno_list.append(dauno)
+            row += 1
+        except Exception:
+            break
+    return ltxa1_list, dauno_list
