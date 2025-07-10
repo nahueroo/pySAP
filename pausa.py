@@ -5,15 +5,15 @@ def limpiar_consola():
     os.system("cls")
 
 def pausaPorConsola():
-    print("\n\n\nPresiona ENTER para continuar, o ESC para salir...")
+    print("")
 
     while True:
         key = msvcrt.getch()
         if key == b'\r': #ENTER
-            print("Continuando...")
+            print("ok...")
             return 0
         elif key == b'\x1b': #ESC
-            print("Detenido por ESC")
+            print("")
             return 1
         else:
-            print("Tecla no valida. Usa ENTER o ESC")
+            print("")

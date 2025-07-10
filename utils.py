@@ -120,9 +120,9 @@ def aceptar_g02(session):
 def pausa():
     exit_code = pausaPorConsola()
     if exit_code == 0:
-        print("Pausa termino con 0, continuando")
+        print("")
     elif exit_code == 1:
-        print("Pausa termino con 1, deteniendo")
+        print("")
         exit(1)
     else:
         print(f"Codigo de salida inesperado: {exit_code}")
@@ -155,15 +155,13 @@ def mostrar_datos():
     print(f"Texto Breve:  {datos['Texto Breve']}")
 
     print("\n-----Ubicacion-----\n")
-    print(f"Ubicación Aviso:  {datos['Ubicacion Aviso']}")
-    print(f"UT:  {datos['Ubicacion Tecnica']}")
+    print(f"CAME:  {datos['Ubicacion Aviso']}")
+    print(f"CARE:  {datos['Ubicacion Tecnica']}")
 
     print("\n-----Clase de Actividad-----\n")
-    print(f"Clase de actividad:  {datos['Clase de actividad']}")
-    print(f"Clase de actividad aviso:  {datos['Clase de actividad aviso']}")
+    print(f"CAME:  {datos['Clase de actividad']}")
+    print(f"CARE:  {datos['Clase de actividad aviso']}")
     
     print("\n-----AVISO-----\n")
     print(f"Tipo:  {datos['Tipo Aviso']}")
-    print(f"Autor:  {datos['Autor Aviso']}")
-    print(f"Fecha:  {datos['Fecha Aviso']}")
     print(f"Servicio:  {datos['Servicio']}")
