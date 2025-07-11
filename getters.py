@@ -40,6 +40,7 @@ def get_textoBreveCare(session):
         return session.findById(ruta).text
     except Exception:
         return None
+
 def get_aviso_tipo(session):
     ruta = (
         "wnd[0]/usr/subSCREEN_1:SAPLIQS0:1050/"
