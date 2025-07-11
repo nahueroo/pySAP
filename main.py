@@ -1,6 +1,5 @@
 from scripts import flujo_general, flujo_tecnovias
 from pausa import limpiar_consola
-from globales import datos
 
 def mostrar_menu():
     print("\n---MENU ---")

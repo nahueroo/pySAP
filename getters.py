@@ -8,32 +8,12 @@ def get_textoBreve(session):
         return session.findById(ruta).text
     except Exception:
         return None
-    
-def get_gPlanificador(session):
-    ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
-            "ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/" \
-            "ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/" \
-            "ctxtCAUFVD-INGPR"
-    try:
-        return session.findById(ruta).text
-    except Exception:
-        return None
 
 def get_claseActividad(session):
     ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
             "ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/" \
             "ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/" \
             "ctxtCAUFVD-ILART"
-    try:
-        return session.findById(ruta).text
-    except Exception:
-        return None
-    
-def get_care(session):
-    ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
-            "ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/" \
-            "ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/" \
-            "subMAINORDER:SAPLCOIH:0152/ctxtCAUFVD-MAUFNR"
     try:
         return session.findById(ruta).text
     except Exception:
@@ -50,16 +30,6 @@ def get_UT(session):
         return session.findById(ruta).text
     except Exception:
         return None
-    
-def get_aviso(session):
-    ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
-            "ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/" \
-            "ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/" \
-            "txtCAUFVD-QMNUM"
-    try:
-        return session.findById(ruta).text
-    except Exception:
-        return None
 
 def get_textoBreveCare(session):
     ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
@@ -70,8 +40,6 @@ def get_textoBreveCare(session):
         return session.findById(ruta).text
     except Exception:
         return None
-    
-
 def get_aviso_tipo(session):
     ruta = (
         "wnd[0]/usr/subSCREEN_1:SAPLIQS0:1050/"
@@ -401,103 +369,7 @@ def get_texto_largo_aviso(session):
     except Exception as e:
         return None
 
-def get_lineas_texto_aviso(session):
-    """
-    Obtiene las líneas de texto largo de un aviso como lista.
-    Versión alternativa que devuelve lista en lugar de texto concatenado.
-    
-    Args:
-        session: Sesión activa de SAP GUI
-    
-    Returns:
-        list: Lista de líneas de texto, o lista vacía si hay error
-    """
-    try:
-        texto_completo = get_texto_largo_aviso(session)
-        if texto_completo:
-            return [linea.strip() for linea in texto_completo.split('\n') if linea.strip()]
-        return []
-        
-    except Exception as e:
-        return []
 
-def get_texto_especifico_aviso(session, buscar_palabra):
-    """
-    Busca una palabra específica en el texto largo del aviso y devuelve las líneas que la contienen.
-    
-    Args:
-        session: Sesión activa de SAP GUI
-        buscar_palabra (str): Palabra o frase a buscar
-    
-    Returns:
-        list: Lista de líneas que contienen la palabra buscada
-    """
-    try:
-        lineas = get_lineas_texto_aviso(session)
-        lineas_encontradas = []
-        
-        for linea in lineas:
-            if buscar_palabra.lower() in linea.lower():
-                lineas_encontradas.append(linea)
-        
-        return lineas_encontradas
-        
-    except Exception as e:
-        return []
 
-def diagnosticar_tabla_texto_aviso(session):
-    """
-    Función de diagnóstico para entender la estructura de la tabla de texto largo.
-    Útil para debuggear problemas con get_texto_largo_aviso.
-    
-    Args:
-        session: Sesión activa de SAP GUI
-    
-    Returns:
-        dict: Información diagnóstica de la tabla
-    """
-    try:
-        # Maximizar ventana
-        session.findById("wnd[0]").maximize()
-        
-        # Ruta base para la tabla de texto largo
-        base_ruta = (r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/"
-                     r"ssubSUB_GROUP_10:SAPLIQS0:7235/"
-                     r"subCUSTOM_SCREEN:SAPLIQS0:7212/"
-                     r"subSUBSCREEN_1:SAPLIQS0:7710/")
-        
-        tabla_ruta = base_ruta + "tblSAPLIQS0TEXT"
-        
-        # Obtener información de la tabla
-        tabla = session.findById(tabla_ruta)
-        
-        info = {
-            'tabla_encontrada': True,
-            'filas_visibles': tabla.visibleRowCount,
-            'total_filas': tabla.rowCount,
-            'columnas_visibles': tabla.visibleColumnCount,
-            'total_columnas': tabla.columnCount,
-            'posicion_scroll_vertical': tabla.verticalScrollbar.position,
-            'max_posicion_scroll': tabla.verticalScrollbar.maximum,
-            'posicion_scroll_horizontal': tabla.horizontalScrollbar.position,
-            'max_posicion_horizontal': tabla.horizontalScrollbar.maximum,
-            'muestra_primeras_5_filas': []
-        }
-        
-        # Intentar leer las primeras 5 filas para ver el contenido
-        for fila in range(min(5, tabla.visibleRowCount)):
-            try:
-                celda = session.findById(f"{tabla_ruta}/txtLTXTTAB2-TLINE[0,{fila}]")
-                texto = celda.text.strip()
-                info['muestra_primeras_5_filas'].append(f"Fila {fila}: '{texto}'")
-            except Exception as e:
-                info['muestra_primeras_5_filas'].append(f"Fila {fila}: ERROR - {str(e)}")
-        
-        return info
-        
-    except Exception as e:
-        return {
-            'tabla_encontrada': False,
-            'error': str(e),
-            'posible_causa': 'La tabla no existe o la ruta es incorrecta'
-        }
+
+

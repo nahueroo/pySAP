@@ -30,18 +30,7 @@ def esperar_elemento(session, elemento_id, timeout=5):
     # Si llego aqui, se agota el timeout
     return False  # No se encontró el elemento en el tiempo dado
 
-def esperar_cierre_ventana(session, numero_ventana, timeout=5):
-    # Espera hasta que la ventana se cierre
-    import time
-    tiempo_inicial = time.time()
 
-    while time.time() - tiempo_inicial < timeout:
-        if session.Children.Count <= numero_ventana:
-            return True
-        time.sleep(0.1)  # Espera un poco antes de volver a intentar
-    
-    # Si llego aqui, se agota el timeout
-    return False  # La ventana sigue abierta después del timeout    
 
 def esperar_popup(session, timeout=5):
     # Espera hasta que aparezca un popup

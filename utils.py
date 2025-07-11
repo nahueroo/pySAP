@@ -2,7 +2,7 @@ import time
 import pyautogui
 from pausa import pausaPorConsola
 from getters import *
-from globales import datos, esperar_elemento, esperar_cierre_ventana, esperar_popup
+from globales import datos, esperar_elemento, esperar_popup
 
 #entrar a came seleccionada desde IW38
 
