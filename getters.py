@@ -92,7 +92,6 @@ def get_aviso_autor(session):
         # Si necesitas enviar sendVKey para activar algo, puedes hacerlo fuera del getter
         return campo.text
     except Exception as e:
-        print(f"[ERROR] Nombre solicitante: {e}")
         return None
     
 def get_aviso_fecha(session):
@@ -104,7 +103,6 @@ def get_aviso_fecha(session):
         campo.caretPosition = 5
         return campo.text
     except Exception as e:
-        print(f"[ERROR] Fecha de notificación: {e}")
         return None
         
 def get_aviso_servicio(session):
@@ -116,14 +114,15 @@ def get_aviso_servicio(session):
         campo.caretPosition = 23
         return campo.text
     except Exception as e:
-        print(f"[ERROR] Texto aviso: {e}")
         return None
 
 def getter_care(session):
-    """Obtiene todos los valores válidos de los campos LTXA1 y ARBEI de la operación actual."""
+    """Obtiene todos los valores válidos de los campos LTXA1 y ARBEI de la operación actual y los devuelve en formato tabla ordenado."""
     ltxa1_list = []
     arbei_list = []
     row = 0
+    
+    # Recopilar datos
     while True:
         try:
             ltxa1 = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-LTXA1[7,{row}]").text
@@ -134,13 +133,53 @@ def getter_care(session):
             row += 1
         except Exception:
             break
-    return ltxa1_list, arbei_list
+    
+    # Si no hay datos, devolver string vacío
+    if not ltxa1_list:
+        return ""
+    
+    # Combinar y ordenar por TRABAJO (alfabéticamente)
+    combined_data = list(zip(ltxa1_list, arbei_list))
+    combined_data.sort(key=lambda x: x[0].lower())
+    
+    # Calcular anchos máximos para justificación
+    max_trabajo_width = max(len("TRABAJO"), max(len(trabajo) for trabajo, _ in combined_data))
+    max_itemizado_width = max(len("ITEMIZADO"), max(len(itemizado) for _, itemizado in combined_data))
+    
+    # Crear tabla formateada
+    separator = "+" + "-" * (max_trabajo_width + 2) + "+" + "-" * (max_itemizado_width + 2) + "+"
+    header = f"| {'TRABAJO'.ljust(max_trabajo_width)} | {'ITEMIZADO'.ljust(max_itemizado_width)} |"
+    
+    result = [separator, header, separator]
+    
+    # Agregar datos sin subtotales
+    for trabajo, itemizado in combined_data:
+        row = f"| {trabajo.ljust(max_trabajo_width)} | {itemizado.ljust(max_itemizado_width)} |"
+        result.append(row)
+    
+    result.append(separator)
+    
+    # Total general
+    try:
+        all_itemizados = [float(itemizado.replace(',', '.')) for _, itemizado in combined_data if itemizado.strip()]
+        total_value = sum(all_itemizados)
+        total_text = f"TOTAL GENERAL: {total_value:.2f}"
+    except (ValueError, TypeError):
+        total_text = f"TOTAL GENERAL: {len(combined_data)} item(s)"
+    
+    total_row = f"| {total_text.ljust(max_trabajo_width + max_itemizado_width + 3)} |"
+    result.append(total_row)
+    result.append(separator)
+    
+    return "\n".join(result)
 
 def getter_came(session):
-    """Obtiene todos los valores válidos de los campos LTXA1 y DAUNO de la operación actual."""
+    """Obtiene todos los valores válidos de los campos LTXA1 y DAUNO de la operación actual y los devuelve en formato tabla ordenado con subtotales."""
     ltxa1_list = []
     dauno_list = []
     row = 0
+    
+    # Recopilar datos
     while True:
         try:
             ltxa1 = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-LTXA1[7,{row}]").text
@@ -151,4 +190,314 @@ def getter_came(session):
             row += 1
         except Exception:
             break
-    return ltxa1_list, dauno_list
+    
+    # Si no hay datos, devolver string vacío
+    if not ltxa1_list:
+        return ""
+    
+    # Combinar y ordenar por TRABAJO (alfabéticamente)
+    combined_data = list(zip(ltxa1_list, dauno_list))
+    combined_data.sort(key=lambda x: x[0].lower())
+    
+    # Agrupar por trabajo para subtotales
+    from collections import defaultdict
+    grouped_data = defaultdict(list)
+    for trabajo, cantidad in combined_data:
+        grouped_data[trabajo].append(cantidad)
+    
+    # Calcular anchos máximos para justificación
+    max_trabajo_width = max(len("TRABAJO"), max(len(trabajo) for trabajo in grouped_data.keys()))
+    max_cantidad_width = max(len("CANTIDAD"), max(len(item) for sublist in grouped_data.values() for item in sublist))
+    
+    # Crear tabla formateada
+    separator = "+" + "-" * (max_trabajo_width + 2) + "+" + "-" * (max_cantidad_width + 2) + "+"
+    header = f"| {'TRABAJO'.ljust(max_trabajo_width)} | {'CANTIDAD'.ljust(max_cantidad_width)} |"
+    
+    result = [separator, header, separator]
+    
+    # Agregar datos agrupados con subtotales
+    for trabajo in sorted(grouped_data.keys(), key=str.lower):
+        cantidades = grouped_data[trabajo]
+        
+        # Primera fila del grupo
+        first_row = f"| {trabajo.ljust(max_trabajo_width)} | {cantidades[0].ljust(max_cantidad_width)} |"
+        result.append(first_row)
+        
+        # Filas adicionales del grupo (trabajo vacío)
+        for cantidad in cantidades[1:]:
+            additional_row = f"| {' '.ljust(max_trabajo_width)} | {cantidad.ljust(max_cantidad_width)} |"
+            result.append(additional_row)
+        
+        # Calcular subtotal numérico si las cantidades son números
+        try:
+            numeric_cantidades = [float(c.replace(',', '.')) for c in cantidades if c.strip()]
+            subtotal_value = sum(numeric_cantidades)
+            subtotal_text = f"Subtotal: {subtotal_value:.2f}"
+        except (ValueError, TypeError):
+            subtotal_text = f"Subtotal: {len(cantidades)} item(s)"
+        
+        # Subtotal del grupo
+        subtotal_separator = "+" + "-" * (max_trabajo_width + 2) + "+" + "-" * (max_cantidad_width + 2) + "+"
+        subtotal_row = f"| {subtotal_text.ljust(max_trabajo_width + max_cantidad_width + 3)} |"
+        result.append(subtotal_separator)
+        result.append(subtotal_row)
+        result.append(separator)
+    
+    return "\n".join(result)
+
+def get_texto_largo_aviso(session):
+    """
+    Obtiene todo el contenido de texto largo de un aviso en SAP.
+    Versión que combina acceso directo e inteligente navegación con scroll.
+    
+    Args:
+        session: Sesión activa de SAP GUI
+    
+    Returns:
+        str: Texto completo del aviso concatenado, o None si hay error
+    """
+    try:
+        # Maximizar ventana para asegurar visibilidad completa
+        session.findById("wnd[0]").maximize()
+        
+        # Ruta base para la tabla de texto largo
+        base_ruta = (r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/"
+                     r"ssubSUB_GROUP_10:SAPLIQS0:7235/"
+                     r"subCUSTOM_SCREEN:SAPLIQS0:7212/"
+                     r"subSUBSCREEN_1:SAPLIQS0:7710/")
+        
+        tabla_ruta = base_ruta + "tblSAPLIQS0TEXT"
+        
+        # Set para evitar duplicados exactos
+        lineas_unicas = set()
+        lineas_ordenadas = []
+        
+        # Obtener referencia a la tabla
+        tabla = session.findById(tabla_ruta)
+        
+        # Obtener información básica de la tabla
+        try:
+            filas_visibles = tabla.visibleRowCount
+            total_filas = tabla.rowCount
+        except:
+            filas_visibles = 4
+            total_filas = 20
+        
+        # Resetear scroll al inicio
+        try:
+            if hasattr(tabla, 'verticalScrollbar'):
+                tabla.verticalScrollbar.position = 0
+            if hasattr(tabla, 'firstVisibleRow'):
+                tabla.firstVisibleRow = 0
+        except:
+            pass
+        
+        # ESTRATEGIA PRINCIPAL: Navegación sistemática con scroll
+        # Primero: explorar contenido visible inicial
+        for fila in range(filas_visibles):
+            try:
+                celda = session.findById(f"{tabla_ruta}/txtLTXTTAB2-TLINE[0,{fila}]")
+                texto = celda.text
+                
+                if texto and texto.strip():
+                    if texto not in lineas_unicas:
+                        lineas_unicas.add(texto)
+                        lineas_ordenadas.append(texto)
+                        
+            except:
+                continue
+        
+        # Segundo: navegar con scroll si hay más filas
+        if total_filas > filas_visibles:
+            # Calcular cuántas posiciones de scroll necesitamos
+            posiciones_scroll = range(1, total_filas - filas_visibles + 2)
+            
+            for pos_scroll in posiciones_scroll:
+                try:
+                    # Intentar mover scroll
+                    if hasattr(tabla, 'verticalScrollbar'):
+                        tabla.verticalScrollbar.position = pos_scroll
+                    
+                    # Leer filas visibles en esta posición
+                    for fila in range(filas_visibles):
+                        try:
+                            celda = session.findById(f"{tabla_ruta}/txtLTXTTAB2-TLINE[0,{fila}]")
+                            texto = celda.text
+                            
+                            if texto and texto.strip():
+                                if texto not in lineas_unicas:
+                                    lineas_unicas.add(texto)
+                                    lineas_ordenadas.append(texto)
+                                    
+                        except:
+                            continue
+                            
+                except:
+                    continue
+        
+        # ESTRATEGIA ALTERNATIVA: Si lo anterior no funcionó bien, usar firstVisibleRow
+        if len(lineas_ordenadas) < 3:  # Si obtuvimos muy poco contenido
+            try:
+                # Resetear
+                tabla.firstVisibleRow = 0
+                
+                # Navegar por firstVisibleRow
+                for start_row in range(0, total_filas, max(1, filas_visibles - 1)):
+                    try:
+                        tabla.firstVisibleRow = start_row
+                        
+                        # Leer filas visibles
+                        for fila in range(filas_visibles):
+                            try:
+                                celda = session.findById(f"{tabla_ruta}/txtLTXTTAB2-TLINE[0,{fila}]")
+                                texto = celda.text
+                                
+                                if texto and texto.strip():
+                                    if texto not in lineas_unicas:
+                                        lineas_unicas.add(texto)
+                                        lineas_ordenadas.append(texto)
+                                        
+                            except:
+                                continue
+                                
+                    except:
+                        continue
+                        
+            except:
+                pass
+        
+        # ESTRATEGIA DE RESPALDO: Acceso directo por índices
+        if len(lineas_ordenadas) < 2:  # Si aún tenemos muy poco contenido
+            # Resetear tabla
+            try:
+                if hasattr(tabla, 'verticalScrollbar'):
+                    tabla.verticalScrollbar.position = 0
+            except:
+                pass
+            
+            # Intentar acceso directo
+            for indice in range(min(100, total_filas * 2)):
+                try:
+                    celda = session.findById(f"{tabla_ruta}/txtLTXTTAB2-TLINE[0,{indice}]")
+                    texto = celda.text
+                    
+                    if texto and texto.strip():
+                        if texto not in lineas_unicas:
+                            lineas_unicas.add(texto)
+                            lineas_ordenadas.append(texto)
+                            
+                except:
+                    continue
+        
+        # Construir resultado final
+        if not lineas_ordenadas:
+            return None
+        
+        # Unir todas las líneas preservando saltos de línea
+        texto_completo = "\n".join(lineas_ordenadas)
+        
+        return texto_completo if texto_completo.strip() else None
+        
+    except Exception as e:
+        return None
+
+def get_lineas_texto_aviso(session):
+    """
+    Obtiene las líneas de texto largo de un aviso como lista.
+    Versión alternativa que devuelve lista en lugar de texto concatenado.
+    
+    Args:
+        session: Sesión activa de SAP GUI
+    
+    Returns:
+        list: Lista de líneas de texto, o lista vacía si hay error
+    """
+    try:
+        texto_completo = get_texto_largo_aviso(session)
+        if texto_completo:
+            return [linea.strip() for linea in texto_completo.split('\n') if linea.strip()]
+        return []
+        
+    except Exception as e:
+        return []
+
+def get_texto_especifico_aviso(session, buscar_palabra):
+    """
+    Busca una palabra específica en el texto largo del aviso y devuelve las líneas que la contienen.
+    
+    Args:
+        session: Sesión activa de SAP GUI
+        buscar_palabra (str): Palabra o frase a buscar
+    
+    Returns:
+        list: Lista de líneas que contienen la palabra buscada
+    """
+    try:
+        lineas = get_lineas_texto_aviso(session)
+        lineas_encontradas = []
+        
+        for linea in lineas:
+            if buscar_palabra.lower() in linea.lower():
+                lineas_encontradas.append(linea)
+        
+        return lineas_encontradas
+        
+    except Exception as e:
+        return []
+
+def diagnosticar_tabla_texto_aviso(session):
+    """
+    Función de diagnóstico para entender la estructura de la tabla de texto largo.
+    Útil para debuggear problemas con get_texto_largo_aviso.
+    
+    Args:
+        session: Sesión activa de SAP GUI
+    
+    Returns:
+        dict: Información diagnóstica de la tabla
+    """
+    try:
+        # Maximizar ventana
+        session.findById("wnd[0]").maximize()
+        
+        # Ruta base para la tabla de texto largo
+        base_ruta = (r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/"
+                     r"ssubSUB_GROUP_10:SAPLIQS0:7235/"
+                     r"subCUSTOM_SCREEN:SAPLIQS0:7212/"
+                     r"subSUBSCREEN_1:SAPLIQS0:7710/")
+        
+        tabla_ruta = base_ruta + "tblSAPLIQS0TEXT"
+        
+        # Obtener información de la tabla
+        tabla = session.findById(tabla_ruta)
+        
+        info = {
+            'tabla_encontrada': True,
+            'filas_visibles': tabla.visibleRowCount,
+            'total_filas': tabla.rowCount,
+            'columnas_visibles': tabla.visibleColumnCount,
+            'total_columnas': tabla.columnCount,
+            'posicion_scroll_vertical': tabla.verticalScrollbar.position,
+            'max_posicion_scroll': tabla.verticalScrollbar.maximum,
+            'posicion_scroll_horizontal': tabla.horizontalScrollbar.position,
+            'max_posicion_horizontal': tabla.horizontalScrollbar.maximum,
+            'muestra_primeras_5_filas': []
+        }
+        
+        # Intentar leer las primeras 5 filas para ver el contenido
+        for fila in range(min(5, tabla.visibleRowCount)):
+            try:
+                celda = session.findById(f"{tabla_ruta}/txtLTXTTAB2-TLINE[0,{fila}]")
+                texto = celda.text.strip()
+                info['muestra_primeras_5_filas'].append(f"Fila {fila}: '{texto}'")
+            except Exception as e:
+                info['muestra_primeras_5_filas'].append(f"Fila {fila}: ERROR - {str(e)}")
+        
+        return info
+        
+    except Exception as e:
+        return {
+            'tabla_encontrada': False,
+            'error': str(e),
+            'posible_causa': 'La tabla no existe o la ruta es incorrecta'
+        }

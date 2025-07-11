@@ -8,6 +8,7 @@ datos = {
     "Autor Aviso" : None,
     "Fecha Aviso" : None,
     "Servicio" : None,
+    "Aviso" : None,
 }
 
 def esperar_elemento(session, elemento_id, timeout=5):

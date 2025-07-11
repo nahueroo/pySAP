@@ -15,13 +15,18 @@ def flujo_base(tipo_flujo):
     ver_fotos_en_care(session)
     entrar_a_aviso(session)
     mostrar_datos()
-    pausa()
     aceptar_g02(session)
     aceptar_itemizado(session)
     aceptar_medicion(session)
-    pausa()
-    cgi(session)
-    cerrar_pestanas_chrome()
+    
+    # Manejar la pausa y el comportamiento según la respuesta del usuario
+    exit_code = pausa()
+    if exit_code == 1:  # Usuario presionó ESC
+        salir(session)
+        cerrar_pestanas_chrome()
+    else:  # Usuario presionó ENTER (exit_code == 0)
+        cgi(session)
+        cerrar_pestanas_chrome()
 
 def flujo_general():
     flujo_base("general")

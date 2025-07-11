@@ -109,6 +109,14 @@ def entrar_a_aviso(session):
         datos["Autor Aviso"] = get_aviso_autor(session)
         datos["Fecha Aviso"] = get_aviso_fecha(session)
         datos["Servicio"] = get_aviso_servicio(session)
+        
+        # Obtener texto largo del aviso en una sola línea
+        texto_largo = get_texto_largo_aviso(session)
+        if texto_largo:
+            # Convertir saltos de línea a espacios para que quede en una sola línea
+            datos["Aviso"] = texto_largo.replace('\n', ' ').replace('\r', ' ')
+        else:
+            datos["Aviso"] = "Sin texto largo disponible"
 
 def aceptar_g02(session):
     session.findById("wnd[0]/tbar[0]/btn[3]").press()
@@ -116,16 +124,21 @@ def aceptar_g02(session):
     # Espera a que se procese y luego selecciona la pestaña
     if esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=3):
         session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
-        ltxa1_care, arbei_care = getter_care(session)
-        print(f"{ltxa1_care},       {arbei_care}")
+        care_table = getter_care(session)
+        if care_table:
+            print("\n\nItemizado:")
+            print(care_table)
+        else:
+            print("No se encontraron datos CARE válidos.")
 
 def pausa():
     exit_code = pausaPorConsola()
     if exit_code == 0:
         print("")
+        return 0  # Continúa normalmente
     elif exit_code == 1:
         print("")
-        exit(1)
+        return 1  # Indica que se presionó ESC
     else:
         print(f"Codigo de salida inesperado: {exit_code}")
         exit(exit_code)
@@ -138,8 +151,12 @@ def aceptar_itemizado(session):
         session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
         # Espera adicional para que se cargue completamente
         esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=2)
-        ltxa1_came, dauno_came = getter_came(session)
-        print(f"{ltxa1_came},       {dauno_came}")
+        came_table = getter_came(session)
+        if came_table:
+            print("\n\nCargado:")
+            print(came_table)
+        else:
+            print("No se encontraron datos CAME válidos.")
 
 def aceptar_medicion(session):
     # Espera a que la pestaña esté disponible y la selecciona
@@ -155,17 +172,80 @@ def cgi(session):
         pyautogui.press('down')
 
 def mostrar_datos():
-    print("\n-----CAME-----\n")
-    print(f"Texto Breve:  {datos['Texto Breve']}")
-
-    print("\n-----Ubicacion-----\n")
-    print(f"CAME:  {datos['Ubicacion Aviso']}")
-    print(f"CARE:  {datos['Ubicacion Tecnica']}")
-
-    print("\n-----Clase de Actividad-----\n")
-    print(f"CAME:  {datos['Clase de actividad']}")
-    print(f"CARE:  {datos['Clase de actividad aviso']}")
+    # Calcular el ancho máximo para alinear columnas
+    max_key_width = max(len("Clase de actividad aviso"), len("Ubicacion Tecnica"), len("Texto Breve"))
+    max_value_width = 50
     
-    print("\n-----AVISO-----\n")
-    print(f"Tipo:  {datos['Tipo Aviso']}")
-    print(f"Servicio:  {datos['Servicio']}")
+    # Crear separador
+    separator = "+" + "-" * (max_key_width + 2) + "+" + "-" * (max_value_width + 2) + "+"
+    
+    print("\n" + separator)
+    
+    # Texto Breve
+    print(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos['Texto Breve'] or '').ljust(max_value_width)} |")
+    print(separator)
+    
+    # Ubicaciones
+    print(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos['Ubicacion Tecnica'] or '').ljust(max_value_width)} |")
+    print(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos['Ubicacion Aviso'] or '').ljust(max_value_width)} |")
+    print(separator)
+    
+    # Clases de Actividad
+    print(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos['Clase de actividad'] or '').ljust(max_value_width)} |")
+    print(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos['Clase de actividad aviso'] or '').ljust(max_value_width)} |")
+    print(separator)
+    
+    # Datos del Aviso
+    print(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos['Tipo Aviso'] or '').ljust(max_value_width)} |")
+    print(f"| {'Servicio'.ljust(max_key_width)} | {str(datos['Servicio'] or '').ljust(max_value_width)} |")
+    print(separator)
+    
+    # Texto del aviso completo - dividir en líneas si es muy largo
+    aviso_text = str(datos['Aviso'] or '')
+    if len(aviso_text) <= max_value_width:
+        # Si cabe en una línea, mostrar normalmente
+        print(f"| {'Aviso'.ljust(max_key_width)} | {aviso_text.ljust(max_value_width)} |")
+    else:
+        # Si es muy largo, dividir en múltiples líneas
+        words = aviso_text.split()
+        lines = []
+        current_line = ""
+        
+        for word in words:
+            # Si agregar la palabra no excede el límite
+            if len(current_line + " " + word if current_line else word) <= max_value_width:
+                current_line = current_line + " " + word if current_line else word
+            else:
+                # Si la línea actual no está vacía, guardarla
+                if current_line:
+                    lines.append(current_line)
+                # Si la palabra sola es más larga que el ancho máximo, cortarla
+                if len(word) > max_value_width:
+                    while len(word) > max_value_width:
+                        lines.append(word[:max_value_width])
+                        word = word[max_value_width:]
+                    current_line = word if word else ""
+                else:
+                    current_line = word
+        
+        # Agregar la última línea si no está vacía
+        if current_line:
+            lines.append(current_line)
+        
+        # Mostrar la primera línea con la etiqueta "Aviso"
+        if lines:
+            print(f"| {'Aviso'.ljust(max_key_width)} | {lines[0].ljust(max_value_width)} |")
+            # Mostrar las líneas restantes con etiqueta vacía
+            for line in lines[1:]:
+                print(f"| {' '.ljust(max_key_width)} | {line.ljust(max_value_width)} |")
+        else:
+            print(f"| {'Aviso'.ljust(max_key_width)} | {' '.ljust(max_value_width)} |")
+    
+    print(separator)
+
+def salir(session):
+    """Simula presionar F3 y luego ENTER para salir"""
+    # Usar SAP GUI directamente en lugar de pyautogui
+    session.findById("wnd[0]").sendVKey(15)  # F3 en SAP
+    time.sleep(0.5)
+    session.findById("wnd[0]").sendVKey(0)   # ENTER en SAP
