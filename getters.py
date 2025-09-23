@@ -47,8 +47,10 @@ def get_aviso_tipo(session):
         "subNOTIF_TYPE:SAPLIQS0:1051/ctxtVIQMEL-QMART"
     )
     try:
-        return session.findById(ruta).text
-    except Exception:
+        elemento = session.findById(ruta)
+        texto = elemento.text
+        return texto
+    except Exception as e:
         return None
     
 def get_aviso_autor(session):
@@ -81,7 +83,8 @@ def get_aviso_servicio(session):
         campo = session.findById(ruta)
         campo.setFocus()
         campo.caretPosition = 23
-        return campo.text
+        texto = campo.text
+        return texto
     except Exception as e:
         return None
 

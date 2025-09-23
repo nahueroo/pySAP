@@ -14,12 +14,10 @@ def flujo_base(tipo_flujo):
     entrar_a_care(session)
     ver_fotos_en_care(session)
     entrar_a_aviso(session)
+    aceptar_g02(session)
+    aceptar_itemizado(session)
     pausa()
     mostrar_datos()
-    aceptar_g02(session)
-    pausa()
-    aceptar_itemizado(session)
-    aceptar_medicion(session)
     
     # Manejar la pausa y el comportamiento según la respuesta del usuario
     exit_code = pausa()

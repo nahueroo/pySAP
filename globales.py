@@ -11,6 +11,8 @@ datos = {
     "Fecha Aviso" : None,
     "Servicio" : None,
     "Aviso" : None,
+    "Datos CARE" : None,
+    "Datos CAME" : None,
 }
 
 def esperar_elemento(session, elemento_id, timeout=5):
