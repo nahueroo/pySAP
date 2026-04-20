@@ -1,0 +1,15 @@
+{
+  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2482",
+  "Clase de actividad": "G09",
+  "Ubicacion Tecnica": "MISTRAL, GABRIELA 2901-3000",
+  "Ubicacion Aviso": "RI ADOQUIN MISTRAL, GABRIELA 2902-3000",
+  "Clase de actividad aviso": "G09",
+  "Tipo Aviso": "OF",
+  "Autor Aviso": null,
+  "Fecha Aviso": null,
+  "Servicio": null,
+  "Aviso": "25.02.2026 15:01:11 UTC-3 Florencia Viniarsky (FVINIARSKY) RI ADOQUIN. CALLE PROTEGIDA",
+  "Datos CARE": "+----------------------------------------+-----------+\n| TRABAJO                                | ITEMIZADO |\n+----------------------------------------+-----------+\n| RI ADOQUIN MISTRAL, GABRIELA 2902-3000 | 0         |\n+----------------------------------------+-----------+\n| TOTAL GENERAL: 0.00                                |\n+----------------------------------------+-----------+",
+  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 2.1_Excavación de todo tipo no clasifica | 46,7     |\n+------------------------------------------+----------+\n| Subtotal: 46.70                                     |\n+------------------------------------------+----------+\n| 2.6_Saneamiento con provisión de suelo s | 46,7     |\n+------------------------------------------+----------+\n| Subtotal: 46.70                                     |\n+------------------------------------------+----------+\n| 3.3.2_Mayores a 10 m2                    | 380      |\n+------------------------------------------+----------+\n| Subtotal: 380.00                                    |\n+------------------------------------------+----------+\n| 4.1.1_De granito o granitullo. Utilizaci | 467,4    |\n+------------------------------------------+----------+\n| Subtotal: 467.40                                    |\n+------------------------------------------+----------+",
+  "timestamp": "2026-04-20 12:45:48"
+}

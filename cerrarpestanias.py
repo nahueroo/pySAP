@@ -2,19 +2,21 @@ import time
 import pyautogui
 import pygetwindow as gw
 
-def cerrar_pestanas_chrome(max_tabs=4):
+def cerrar_pestanas_firefox(max_tabs=4):
     count = 0
 
     while count < max_tabs:
-        # Obtener todas las ventanas activas de Chrome
-        chrome_windows = [w for w in gw.getWindowsWithTitle("") if w.title and "chrome" in w.title.lower()]
+        # Obtener todas las ventanas activas de Firefox
+        
+        firefox_windows = [w for w in gw.getWindowsWithTitle("") if w.title and "firefox" in w.title.lower()]
+        
 
-        if not chrome_windows:
+        if not firefox_windows:
             print("No se encontró ventana de Chrome")
             break
 
         # Usar la primera ventana válida
-        ventana = chrome_windows[0]
+        ventana = firefox_windows[0]
 
         # Activar la ventana
         try:
@@ -26,7 +28,7 @@ def cerrar_pestanas_chrome(max_tabs=4):
 
         title = ventana.title.lower()
 
-        if any(x in title for x in["image.html","data.pdf", "Microsoft Word"]):
+        if title == "mozilla firefox" or any(x in title for x in["image.html","data.pdf", "Microsoft Word"]):
             pyautogui.hotkey("ctrl","w")
             time.sleep(0.5)
             count += 1
@@ -36,5 +38,5 @@ def cerrar_pestanas_chrome(max_tabs=4):
             count += 1
 
 if __name__ == "__main__":
-    cerrar_pestanas_chrome()
+    cerrar_pestanas_firefox()
 
