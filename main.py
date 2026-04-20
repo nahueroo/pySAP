@@ -2,6 +2,8 @@ from scripts import flujo_general, flujo_tecnovias
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 from pausa import limpiar_consola
 import win32com.client
+from cerrarpestanias import cerrar_pestanas_firefox
+import os
 
 def mostrar_menu():
     print("\n---MENU ---")
@@ -11,6 +13,8 @@ def mostrar_menu():
     print("4. Salir")
 
 def main():
+    # Crear carpeta actas al inicio
+    os.makedirs("actas", exist_ok=True)
 
     while True:
         limpiar_consola()
@@ -30,7 +34,7 @@ def main():
             break
         else:
             print("Opcion invalida")
-            
 
-if __name__ == "__main__": 
+
+if __name__ == "__main__":
     main()

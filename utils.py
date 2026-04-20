@@ -3,6 +3,8 @@ import pyautogui
 import json
 import os
 import ctypes
+import shutil
+import csv
 from pausa import pausaPorConsola
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
@@ -352,38 +354,38 @@ def cgi(session):
     if esperar_elemento(session, "wnd[0]", timeout=2):
         pyautogui.press('down')
 
-def mostrar_datos():
+def mostrar_datos(carpeta_acta=None):
     # Guardar los datos actuales antes de mostrarlos
     guardar_datos_ultimo()
-    
+
     # Calcular el ancho máximo para alinear columnas
     max_key_width = max(len("Clase de actividad aviso"), len("Ubicacion Tecnica"), len("Texto Breve"))
     max_value_width = 50
-    
+
     # Crear separador
     separator = "+" + "-" * (max_key_width + 2) + "+" + "-" * (max_value_width + 2) + "+"
-    
+
     print("\n" + separator)
-    
+
     # Texto Breve
     print(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos['Texto Breve'] or '').ljust(max_value_width)} |")
     print(separator)
-    
+
     # Ubicaciones
     print(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos['Ubicacion Tecnica'] or '').ljust(max_value_width)} |")
     print(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos['Ubicacion Aviso'] or '').ljust(max_value_width)} |")
     print(separator)
-    
+
     # Clases de Actividad
     print(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos['Clase de actividad'] or '').ljust(max_value_width)} |")
     print(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos['Clase de actividad aviso'] or '').ljust(max_value_width)} |")
     print(separator)
-    
+
     # Datos del Aviso
     print(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos['Tipo Aviso'] or '').ljust(max_value_width)} |")
     print(f"| {'Servicio'.ljust(max_key_width)} | {str(datos['Servicio'] or '').ljust(max_value_width)} |")
     print(separator)
-    
+
     # Texto del aviso completo - dividir en líneas si es muy largo
     aviso_text = str(datos['Aviso'] or '')
     if len(aviso_text) <= max_value_width:
@@ -394,7 +396,7 @@ def mostrar_datos():
         words = aviso_text.split()
         lines = []
         current_line = ""
-        
+
         for word in words:
             # Si agregar la palabra no excede el límite
             if len(current_line + " " + word if current_line else word) <= max_value_width:
@@ -411,11 +413,11 @@ def mostrar_datos():
                     current_line = word if word else ""
                 else:
                     current_line = word
-        
+
         # Agregar la última línea si no está vacía
         if current_line:
             lines.append(current_line)
-        
+
         # Mostrar la primera línea con la etiqueta "Aviso"
         if lines:
             print(f"| {'Aviso'.ljust(max_key_width)} | {lines[0].ljust(max_value_width)} |")
@@ -424,8 +426,18 @@ def mostrar_datos():
                 print(f"| {' '.ljust(max_key_width)} | {line.ljust(max_value_width)} |")
         else:
             print(f"| {'Aviso'.ljust(max_key_width)} | {' '.ljust(max_value_width)} |")
-    
+
     print(separator)
+
+    # Si se proporcionó carpeta_acta, guardar archivos relacionados (pero NO mover)
+    if carpeta_acta:
+        # Guardar datos en archivo txt
+        guardar_datos_txt(carpeta_acta, datos)
+
+        # Agregar datos al CSV histórico
+        agregar_datos_csv(carpeta_acta)
+
+        print(f"\nDatos guardados en: {carpeta_acta}")
 
 def salir(session):
     """Simula presionar F3 y luego ENTER para salir"""
@@ -553,10 +565,10 @@ def traer_consola_al_frente():
         # Obtener el handle de la ventana de la consola
         kernel32 = ctypes.windll.kernel32
         user32 = ctypes.windll.user32
-        
+
         # Obtener el handle de la ventana de la consola actual
         console_window = kernel32.GetConsoleWindow()
-        
+
         if console_window:
             # Traer la ventana al frente
             user32.SetForegroundWindow(console_window)
@@ -566,3 +578,229 @@ def traer_consola_al_frente():
             print("No se pudo obtener el handle de la consola")
     except Exception as e:
         print(f"Error al traer la consola al frente: {e}")
+
+def sanitizar_nombre_carpeta(texto):
+    """Convierte un texto en un nombre de carpeta válido"""
+    if not texto:
+        return "sin_nombre"
+    # Reemplazar caracteres inválidos para nombres de carpeta
+    invalidos = '<>:"/\\|?*'
+    for char in invalidos:
+        texto = texto.replace(char, '_')
+    # Remover espacios al inicio/final y limitar longitud
+    return texto.strip()[:100]
+
+def crear_carpeta_acta(texto_breve):
+    """
+    Crea una carpeta dentro de 'actas' con el nombre del texto breve
+    Retorna la ruta de la carpeta creada
+    """
+    try:
+        # Crear carpeta principal actas si no existe
+        os.makedirs("actas", exist_ok=True)
+
+        # Sanitizar el nombre del texto breve
+        nombre_carpeta = sanitizar_nombre_carpeta(texto_breve)
+
+        # Crear ruta completa
+        carpeta_acta = os.path.join("actas", nombre_carpeta)
+
+        # Crear carpeta acta
+        os.makedirs(carpeta_acta, exist_ok=True)
+
+        return carpeta_acta
+    except Exception as e:
+        print(f"Error al crear carpeta acta: {e}")
+        return None
+
+def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
+    """
+    Mueve archivos de la carpeta SAP GUI a la carpeta destino especificada.
+    Los renombra agregando un sufijo antes de la extensión.
+    Ruta origen: C:\\Users\\nahue\\OneDrive\\Documentos\\SAP\\SAP GUI
+
+    Args:
+        carpeta_destino: Ruta donde mover los archivos
+        sufijo: Sufijo a agregar al nombre (ej: "CAME", "CARE")
+    """
+    try:
+        ruta_sap = r"C:\Users\nahue\OneDrive\Documentos\SAP\SAP GUI"
+
+        # Verificar si la carpeta de origen existe
+        if not os.path.exists(ruta_sap):
+            print(f"Carpeta SAP no encontrada: {ruta_sap}")
+            return False
+
+        # Obtener lista de archivos
+        archivos = os.listdir(ruta_sap)
+
+        if not archivos:
+            print(f"No hay archivos en la carpeta SAP GUI para {sufijo}")
+            return False
+
+        contador = 0
+        for archivo in archivos:
+            ruta_origen = os.path.join(ruta_sap, archivo)
+
+            # Solo procesar archivos, no carpetas
+            if os.path.isfile(ruta_origen):
+                # Separar nombre y extensión
+                nombre_base, extension = os.path.splitext(archivo)
+
+                # Crear nuevo nombre con sufijo
+                nuevo_nombre = f"{nombre_base}_{sufijo}{extension}"
+                ruta_destino = os.path.join(carpeta_destino, nuevo_nombre)
+
+                try:
+                    shutil.move(ruta_origen, ruta_destino)
+                    contador += 1
+                except Exception as e:
+                    print(f"Error moviendo {archivo}: {e}")
+
+        if contador > 0:
+            print(f"Se movieron {contador} archivo(s) con sufijo _{sufijo} a {carpeta_destino}")
+
+        return True
+    except Exception as e:
+        print(f"Error al mover archivos SAP: {e}")
+        return False
+
+def guardar_datos_txt(carpeta_destino, datos_dict):
+    """
+    Guarda los datos formateados en un archivo .txt dentro de la carpeta destino
+    """
+    try:
+        # Crear el contenido formateado como se muestra en pantalla
+        max_key_width = max(len("Clase de actividad aviso"), len("Ubicacion Tecnica"), len("Texto Breve"))
+        max_value_width = 50
+
+        # Crear separador
+        separator = "+" + "-" * (max_key_width + 2) + "+" + "-" * (max_value_width + 2) + "+"
+
+        lineas = ["\n" + separator]
+
+        # Texto Breve
+        lineas.append(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos_dict.get('Texto Breve', '') or '').ljust(max_value_width)} |")
+        lineas.append(separator)
+
+        # Ubicaciones
+        lineas.append(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos_dict.get('Ubicacion Tecnica', '') or '').ljust(max_value_width)} |")
+        lineas.append(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos_dict.get('Ubicacion Aviso', '') or '').ljust(max_value_width)} |")
+        lineas.append(separator)
+
+        # Clases de Actividad
+        lineas.append(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos_dict.get('Clase de actividad', '') or '').ljust(max_value_width)} |")
+        lineas.append(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos_dict.get('Clase de actividad aviso', '') or '').ljust(max_value_width)} |")
+        lineas.append(separator)
+
+        # Datos del Aviso
+        lineas.append(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos_dict.get('Tipo Aviso', '') or '').ljust(max_value_width)} |")
+        lineas.append(f"| {'Servicio'.ljust(max_key_width)} | {str(datos_dict.get('Servicio', '') or '').ljust(max_value_width)} |")
+        lineas.append(separator)
+
+        # Texto del aviso completo - dividir en líneas si es muy largo
+        aviso_text = str(datos_dict.get('Aviso', '') or '')
+        if len(aviso_text) <= max_value_width:
+            lineas.append(f"| {'Aviso'.ljust(max_key_width)} | {aviso_text.ljust(max_value_width)} |")
+        else:
+            words = aviso_text.split()
+            lines = []
+            current_line = ""
+
+            for word in words:
+                if len(current_line + " " + word if current_line else word) <= max_value_width:
+                    current_line = current_line + " " + word if current_line else word
+                else:
+                    if current_line:
+                        lines.append(current_line)
+                    if len(word) > max_value_width:
+                        while len(word) > max_value_width:
+                            lines.append(word[:max_value_width])
+                            word = word[max_value_width:]
+                        current_line = word if word else ""
+                    else:
+                        current_line = word
+
+            if current_line:
+                lines.append(current_line)
+
+            if lines:
+                lineas.append(f"| {'Aviso'.ljust(max_key_width)} | {lines[0].ljust(max_value_width)} |")
+                for line in lines[1:]:
+                    lineas.append(f"| {' '.ljust(max_key_width)} | {line.ljust(max_value_width)} |")
+            else:
+                lineas.append(f"| {'Aviso'.ljust(max_key_width)} | {' '.ljust(max_value_width)} |")
+
+        lineas.append(separator)
+
+        # Agregar datos CARE si existen
+        if datos_dict.get("Datos CARE"):
+            lineas.append("\n\nDatos CARE (Itemizado):")
+            lineas.append(datos_dict["Datos CARE"])
+
+        # Agregar datos CAME si existen
+        if datos_dict.get("Datos CAME"):
+            lineas.append("\n\nDatos CAME (Cargado):")
+            lineas.append(datos_dict["Datos CAME"])
+
+        # Agregar timestamp
+        lineas.append(f"\n\nGenerado: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+        # Guardar archivo
+        ruta_txt = os.path.join(carpeta_destino, "datos.txt")
+        with open(ruta_txt, "w", encoding="utf-8") as archivo:
+            archivo.write("\n".join(lineas))
+
+        return ruta_txt
+    except Exception as e:
+        print(f"Error al guardar archivo txt: {e}")
+        return None
+
+def agregar_datos_csv(carpeta_destino):
+    """
+    Agrega los datos actuales a un archivo CSV histórico
+    """
+    try:
+        ruta_csv = "historico_actas.csv"
+
+        # Preparar datos para CSV
+        fila = {
+            'timestamp': time.strftime("%Y-%m-%d %H:%M:%S"),
+            'Texto Breve': datos.get('Texto Breve', ''),
+            'Clase de actividad': datos.get('Clase de actividad', ''),
+            'Ubicacion Tecnica': datos.get('Ubicacion Tecnica', ''),
+            'Ubicacion Aviso': datos.get('Ubicacion Aviso', ''),
+            'Clase de actividad aviso': datos.get('Clase de actividad aviso', ''),
+            'Tipo Aviso': datos.get('Tipo Aviso', ''),
+            'Autor Aviso': datos.get('Autor Aviso', ''),
+            'Fecha Aviso': datos.get('Fecha Aviso', ''),
+            'Servicio': datos.get('Servicio', ''),
+            'Aviso': str(datos.get('Aviso', ''))[:100] if datos.get('Aviso') else '',
+            'Ruta carpeta': carpeta_destino
+        }
+
+        # Nombres de columnas en orden
+        columnas = [
+            'timestamp', 'Texto Breve', 'Clase de actividad', 'Ubicacion Tecnica',
+            'Ubicacion Aviso', 'Clase de actividad aviso', 'Tipo Aviso', 'Autor Aviso',
+            'Fecha Aviso', 'Servicio', 'Aviso', 'Ruta carpeta'
+        ]
+
+        # Verificar si el archivo ya existe
+        archivo_existe = os.path.exists(ruta_csv)
+
+        # Escribir/Agregar al CSV
+        with open(ruta_csv, 'a' if archivo_existe else 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=columnas)
+
+            # Si es la primera vez, escribir encabezado
+            if not archivo_existe:
+                writer.writeheader()
+
+            # Escribir fila de datos
+            writer.writerow(fila)
+
+        return ruta_csv
+    except Exception as e:
+        print(f"Error al agregar datos a CSV: {e}")
+        return None
