@@ -5,7 +5,7 @@ import os
 import ctypes
 import shutil
 import csv
-from pausa import pausa_por_consola
+from pausa import pausa_por_consola, traer_consola_al_frente
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
 
@@ -558,26 +558,6 @@ def mostrar_ultimo_guardado():
         
     except Exception as e:
         print(f"Error al cargar los datos guardados: {e}")
-
-def traer_consola_al_frente():
-    """Trae la ventana de la consola al frente"""
-    try:
-        # Obtener el handle de la ventana de la consola
-        kernel32 = ctypes.windll.kernel32
-        user32 = ctypes.windll.user32
-
-        # Obtener el handle de la ventana de la consola actual
-        console_window = kernel32.GetConsoleWindow()
-
-        if console_window:
-            # Traer la ventana al frente
-            user32.SetForegroundWindow(console_window)
-            # Asegurar que la ventana esté visible y no minimizada
-            user32.ShowWindow(console_window, 9)  # SW_RESTORE
-        else:
-            print("No se pudo obtener el handle de la consola")
-    except Exception as e:
-        print(f"Error al traer la consola al frente: {e}")
 
 def sanitizar_nombre_carpeta(texto):
     """Convierte un texto en un nombre de carpeta válido"""

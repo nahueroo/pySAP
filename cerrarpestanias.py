@@ -22,7 +22,7 @@ def cerrar_pestanas_firefox(max_tabs=4):
         try:
             ventana.activate()
             time.sleep(0.3)
-        except:
+        except Exception as e:
             print("No se pudo activar la ventana")
             break
 

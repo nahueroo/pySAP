@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2435",
+  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2428",
   "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "MEDEYROS 3401-3450 Calzada",
-  "Ubicacion Aviso": "MEDEYROS 3445",
+  "Ubicacion Tecnica": "VIDAL 3901-4000 Calzada",
+  "Ubicacion Aviso": "VIDAL 3990",
   "Clase de actividad aviso": "G01",
   "Tipo Aviso": "OF",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "09.03.2026 10:30:53 UTC-3 Nadia Carolina Bermejo (NBERMEJO) SERVICIO HUNDIDA EN CALZADA.",
-  "Datos CARE": "+---------------+-----------+\n| TRABAJO       | ITEMIZADO |\n+---------------+-----------+\n| MEDEYROS 3445 | 2         |\n+---------------+-----------+\n| TOTAL GENERAL: 2.00       |\n+---------------+-----------+",
-  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 0,8      |\n+----------------------+----------+\n| Subtotal: 0.80                  |\n+----------------------+----------+",
-  "timestamp": "2026-04-20 14:44:15"
+  "Aviso": "VIDAL 3990",
+  "Datos CARE": "+------------+-----------+\n| TRABAJO    | ITEMIZADO |\n+------------+-----------+\n| VIDAL 3990 | 2         |\n+------------+-----------+\n| TOTAL GENERAL: 2.00    |\n+------------+-----------+",
+  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 0,5      |\n+----------------------+----------+\n| Subtotal: 0.50                  |\n+----------------------+----------+",
+  "timestamp": "2026-04-20 15:26:33"
 }
