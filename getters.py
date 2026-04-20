@@ -1,92 +1,43 @@
 import win32com.client
-    
-def get_textoBreve(session):
-    ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
-            "ssubSUB_LEVEL:SAPLCOIH:1100/" \
-            "subSUB_KOPF:SAPLCOIH:1102/txtCAUFVD-KTEXT"
-    try:
-        return session.findById(ruta).text
-    except Exception:
-        return None
+from constantes import RUTAS_SAP
 
-def get_claseActividad(session):
-    ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
-            "ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/" \
-            "ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/" \
-            "ctxtCAUFVD-ILART"
-    try:
-        return session.findById(ruta).text
-    except Exception:
-        return None
-
-def get_UT(session):
-    ruta = (
-        "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/"
-        "ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/"
-        "ssubSUB_AUFTRAG:SAPLCOIH:1120/subOBJECT:SAPLCOIH:7100/"
-        "txtRIOT-PLTXT"
-    )
-    try:
-        return session.findById(ruta).text
-    except Exception:
-        return None
-
-def get_textoBreveCare(session):
-    ruta =  "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/" \
-            "ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/" \
-            "ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/" \
-            "subMAINORDER:SAPLCOIH:0152/txtCAUFVD_MOR-KTEXT"
-    try:
-        return session.findById(ruta).text
-    except Exception:
-        return None
-
-def get_aviso_tipo(session):
-    ruta = (
-        "wnd[0]/usr/subSCREEN_1:SAPLIQS0:1050/"
-        "subNOTIF_TYPE:SAPLIQS0:1051/ctxtVIQMEL-QMART"
-    )
+def _get_sap_field(session, ruta, nombre_campo="", caret_position=None):
     try:
         elemento = session.findById(ruta)
-        texto = elemento.text
-        return texto
+
+        if caret_position is not None:
+            elemento.setFocus()
+            elemento.caretPosition = caret_position
+
+        return elemento.text
+    
     except Exception as e:
+        print(f"Error al obtener {nombre_campo}: {e}")
         return None
+    
+def get_textoBreve(session):
+    return _get_sap_field(session, RUTAS_SAP["textoBreve"],"Texto Breve")
+
+def get_claseActividad(session):
+    return _get_sap_field(session, RUTAS_SAP["claseActividad"],"Clase de actividad")
+
+def get_UT(session):
+    return _get_sap_field(session, RUTAS_SAP["UT"],"UT")
+
+def get_textoBreveCare(session):
+    return _get_sap_field(session, RUTAS_SAP["textoBreveCare"],"Texto Care")
+
+def get_aviso_tipo(session):
+    return _get_sap_field(session, RUTAS_SAP["aviso_tipo"],"Tipo de aviso")
     
 def get_aviso_autor(session):
-    ruta =  r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/" \
-            r"subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_1:SAPLIQS0:7326/ctxtVIQMEL-QMNAM"
-    try:
-        campo = session.findById(ruta)
-        campo.setFocus()
-        campo.caretPosition = 5
-        # Si necesitas enviar sendVKey para activar algo, puedes hacerlo fuera del getter
-        return campo.text
-    except Exception as e:
-        return None
+    return _get_sap_field(session, RUTAS_SAP["aviso_autor"],"Autor del aviso",caret_position=5)
     
 def get_aviso_fecha(session):
-    ruta =  r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/" \
-            r"subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_1:SAPLIQS0:7326/ctxtVIQMEL-QMDAT"
-    try:
-        campo = session.findById(ruta)
-        campo.setFocus()
-        campo.caretPosition = 5
-        return campo.text
-    except Exception as e:
-        return None
+    return _get_sap_field(session, RUTAS_SAP["aviso_fecha"],"Fecha del aviso",caret_position=5)
         
 def get_aviso_servicio(session):
-    ruta =  r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/" \
-            r"subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_3:SAPLIQS0:7324/txtVIQMFE-FETXT"
-    try:
-        campo = session.findById(ruta)
-        campo.setFocus()
-        campo.caretPosition = 23
-        texto = campo.text
-        return texto
-    except Exception as e:
-        return None
+    return _get_sap_field(session, RUTAS_SAP["aviso_servicio"],"Tipo de aviso",caret_position=23)
 
 def getter_care(session):
     """Obtiene todos los valores válidos de los campos LTXA1 y ARBEI de la operación actual y los devuelve en formato tabla ordenado."""

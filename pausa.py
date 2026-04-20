@@ -1,9 +1,7 @@
 import msvcrt
 import ctypes
 import time
-
-CONTINUE = 0
-CANCEL = 1
+from constantes import CONTINUE, CANCEL
 
 def traer_consola_al_frente():
     """Trae la ventana de la consola al frente - versión simple que funciona"""
