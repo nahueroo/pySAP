@@ -1,8 +1,5 @@
 from scripts import flujo_general, flujo_tecnovias
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
-from pausa import limpiar_consola
-import win32com.client
-from cerrarpestanias import cerrar_pestanas_firefox
 import os
 
 def mostrar_menu():
@@ -17,19 +14,19 @@ def main():
     os.makedirs("actas", exist_ok=True)
 
     while True:
-        limpiar_consola()
+        os.system("cls")
         traer_consola_al_frente()  # Traer consola al frente cada vez que se muestra el menú
         mostrar_menu()
         opcion = input("Opcion?\n")
 
-        if opcion == "g" or opcion == "1":
+        if opcion == "1":
             flujo_general()
-        elif opcion == "t" or opcion == "2":
+        elif opcion == "2":
             flujo_tecnovias()
         elif opcion == "3":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
-        elif opcion == "4" or opcion == "salir":
+        elif opcion == "4":
             print("Saliendo...")
             break
         else:

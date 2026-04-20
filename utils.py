@@ -5,7 +5,7 @@ import os
 import ctypes
 import shutil
 import csv
-from pausa import pausaPorConsola
+from pausa import pausa_por_consola
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
 
@@ -312,7 +312,7 @@ def aceptar_g02(session):
 
 def pausa():
     traer_consola_al_frente()  # Traer consola al frente antes de la pausa
-    exit_code = pausaPorConsola()
+    exit_code = pausa_por_consola()
     if exit_code == 0:
         print("")
         return 0  # Continúa normalmente

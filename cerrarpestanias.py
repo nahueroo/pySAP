@@ -12,7 +12,7 @@ def cerrar_pestanas_firefox(max_tabs=4):
         
 
         if not firefox_windows:
-            print("No se encontró ventana de Chrome")
+            print("No se encontró ventana de Firefox")
             break
 
         # Usar la primera ventana válida

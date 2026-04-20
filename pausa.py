@@ -1,7 +1,9 @@
 import msvcrt
-import os
 import ctypes
 import time
+
+CONTINUE = 0
+CANCEL = 1
 
 def traer_consola_al_frente():
     """Trae la ventana de la consola al frente - versión simple que funciona"""
@@ -23,10 +25,7 @@ def traer_consola_al_frente():
     except Exception as e:
         print(f"Error al traer la consola al frente: {e}")
 
-def limpiar_consola():
-    os.system("cls")
-
-def pausaPorConsola():
+def pausa_por_consola():
     traer_consola_al_frente()  # Traer consola al frente antes de esperar input
     time.sleep(0.2)  # Dar tiempo a Windows para procesar el cambio de ventana
     print("")
@@ -35,9 +34,9 @@ def pausaPorConsola():
         key = msvcrt.getch()
         if key == b'\r': #ENTER
             print("ok...")
-            return 0
+            return CONTINUE
         elif key == b'\x1b': #ESC
             print("")
-            return 1
+            return CANCEL
         else:
             print("")
