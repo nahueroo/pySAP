@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2417",
+  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2416",
   "Clase de actividad": "G01",
   "Ubicacion Tecnica": "PARAGUAY 402-500 Acera Par",
-  "Ubicacion Aviso": "Paraguay 416",
+  "Ubicacion Aviso": "PARAGUAY       450-92",
   "Clase de actividad aviso": "G01",
   "Tipo Aviso": "OF",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "Sin texto largo disponible",
-  "Datos CARE": "+--------------+-----------+\n| TRABAJO      | ITEMIZADO |\n+--------------+-----------+\n| Paraguay 416 | 8         |\n+--------------+-----------+\n| TOTAL GENERAL: 8.00      |\n+--------------+-----------+",
-  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 11.5_Levantamiento y recolocación de pav | 21,8     |\n+------------------------------------------+----------+\n| Subtotal: 21.80                                     |\n+------------------------------------------+----------+",
-  "timestamp": "2026-04-21 11:08:46"
+  "Aviso": "02.09.2025 11:40:05 UTC-3 Rodrigo Acuña (RACUNA) bache",
+  "Datos CARE": "+--------------------+-----------+\n| TRABAJO            | ITEMIZADO |\n+--------------------+-----------+\n| PARAGUAY       450 | 100       |\n| PARAGUAY       492 | 30        |\n+--------------------+-----------+\n| TOTAL GENERAL: 130.00          |\n+--------------------+-----------+",
+  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 11.5_Levantamiento y recolocación de pav | 15,4     |\n|                                          | 4,4      |\n+------------------------------------------+----------+\n| Subtotal: 19.80                                     |\n+------------------------------------------+----------+",
+  "timestamp": "2026-04-21 11:50:00"
 }

@@ -8,6 +8,14 @@ CANCEL = 1
 ENTER = b'\r'
 ESCAPE = b'\x1b'
 
+# Time Sleep
+FIREFOX_ACTIVATE_DELAY = 0.3
+FIREFOX_TAB_SWITCH_DELAY = 0.3
+FIREFOX_CLOSE_DELAY = 0.5
+
+# Nombres Pestañas
+PESTANASFIREFOX = ["image.html","data.pdf", "Microsoft Word"]
+
 # Rutas SAP
 
 RUTA_SAP_DESCARGAS = r"C:\Users\nahue\OneDrive\Documentos\SAP\SAP GUI"
