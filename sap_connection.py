@@ -1,12 +1,7 @@
 import win32com.client
 
 def obtener_session_sap():
-    """Obtener sesion de SAP
-    
-    Returns: Objeto de sesion de SAP
 
-    Exception: Captura errores de conexion
-    """
     try:
         SapGuiAuto  = win32com.client.GetObject("SAPGUI")
         application = SapGuiAuto.GetScriptingEngine

@@ -1,7 +1,7 @@
 import msvcrt
 import ctypes
 import time
-from constantes import CONTINUE, CANCEL
+from constantes import CONTINUE, CANCEL, ENTER, ESCAPE
 
 def traer_consola_al_frente():
     """Trae la ventana de la consola al frente - versión simple que funciona"""
@@ -30,10 +30,10 @@ def pausa_por_consola():
 
     while True:
         key = msvcrt.getch()
-        if key == b'\r': #ENTER
+        if key == ENTER:
             print("ok...")
             return CONTINUE
-        elif key == b'\x1b': #ESC
+        elif key == ESCAPE:
             print("")
             return CANCEL
         else:

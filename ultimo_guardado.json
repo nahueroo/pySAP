@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2403",
+  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2417",
   "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "MISTRAL, GABRIELA 3201-3299 Acera Impar",
-  "Ubicacion Aviso": "MISTRAL, GABRIELA 3201-3299",
+  "Ubicacion Tecnica": "PARAGUAY 402-500 Acera Par",
+  "Ubicacion Aviso": "Paraguay 416",
   "Clase de actividad aviso": "G01",
-  "Tipo Aviso": "SU",
+  "Tipo Aviso": "OF",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "24.02.2026 12:38:13 UTC-3 CRMUSER (CRMUSER)Cuestionario24.02.2026 12:38:13 SUACI_CRM¿Por qué medio realizaste el trámite/servicio? Otro,____________________Nota de alta de incidente24.02.2026 12:38:13 SUACI_CRMvecina comenta que se esta realizando una obra en l a calle Gabrielamistral entre campana y cuenca, están colocando",
-  "Datos CARE": "+---------------------------------+-----------+\n| TRABAJO                         | ITEMIZADO |\n+---------------------------------+-----------+\n| MISTRAL, GABRIELA 3201-3299  MP | 0         |\n| MISTRAL, GABRIELA 3251          | 0         |\n| MISTRAL, GABRIELA Y CAMPANA     | 0         |\n+---------------------------------+-----------+\n| TOTAL GENERAL: 0.00                         |\n+---------------------------------+-----------+",
-  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 5,6      |\n+----------------------+----------+\n| Subtotal: 5.60                  |\n+----------------------+----------+",
-  "timestamp": "2026-04-21 10:20:11"
+  "Aviso": "Sin texto largo disponible",
+  "Datos CARE": "+--------------+-----------+\n| TRABAJO      | ITEMIZADO |\n+--------------+-----------+\n| Paraguay 416 | 8         |\n+--------------+-----------+\n| TOTAL GENERAL: 8.00      |\n+--------------+-----------+",
+  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 11.5_Levantamiento y recolocación de pav | 21,8     |\n+------------------------------------------+----------+\n| Subtotal: 21.80                                     |\n+------------------------------------------+----------+",
+  "timestamp": "2026-04-21 11:08:46"
 }

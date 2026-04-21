@@ -1,6 +1,7 @@
 from cerrarpestanias import cerrar_pestanas_firefox
 from utils import *
 from sap_connection import obtener_session_sap
+from constantes import CANCEL
 
 def flujo_base(tipo_flujo):
     session = obtener_session_sap()
@@ -13,16 +14,14 @@ def flujo_base(tipo_flujo):
 
     if tipo_flujo == "general":
         ver_fotos_en_came(session)
-        # Mover archivos CAME después de ver fotos en CAME
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
     elif tipo_flujo == "tecnovias":
         ver_fotos_en_came_tecno(session)
-        # Mover archivos CAME después de ver fotos en CAME
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
 
     entrar_a_care(session)
     ver_fotos_en_care(session)
-    # Mover archivos CARE después de ver fotos en CARE
+
     mover_y_renombrar_archivos_sap(carpeta_acta, "CARE")
 
     entrar_a_aviso(session)
@@ -32,7 +31,7 @@ def flujo_base(tipo_flujo):
 
     # Manejar la pausa y el comportamiento según la respuesta del usuario
     exit_code = pausa()
-    if exit_code == 1:  # Usuario presionó ESC
+    if exit_code == CANCEL:  # Usuario presionó ESC
         salir(session)
         cerrar_pestanas_firefox()
     else:  # Usuario presionó ENTER (exit_code == 0)

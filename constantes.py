@@ -3,6 +3,11 @@
 CONTINUE = 0
 CANCEL = 1
 
+# Teclas
+
+ENTER = b'\r'
+ESCAPE = b'\x1b'
+
 # Rutas SAP
 
 RUTA_SAP_DESCARGAS = r"C:\Users\nahue\OneDrive\Documentos\SAP\SAP GUI"
