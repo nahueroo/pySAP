@@ -16,28 +16,28 @@ def _get_sap_field(session, ruta, nombre_campo="", caret_position=None):
         return None
     
 def get_textoBreve(session):
-    return _get_sap_field(session, RUTAS_SAP["textoBreve"],"Texto Breve")
+    return _get_sap_field(session, RUTAS_SAP["textoBreve"],nombre_campo="Texto Breve")
 
 def get_claseActividad(session):
-    return _get_sap_field(session, RUTAS_SAP["claseActividad"],"Clase de actividad")
+    return _get_sap_field(session, RUTAS_SAP["claseActividad"],nombre_campo="Clase de actividad")
 
 def get_UT(session):
-    return _get_sap_field(session, RUTAS_SAP["UT"],"UT")
+    return _get_sap_field(session, RUTAS_SAP["UT"],nombre_campo="UT")
 
 def get_textoBreveCare(session):
-    return _get_sap_field(session, RUTAS_SAP["textoBreveCare"],"Texto Care")
+    return _get_sap_field(session, RUTAS_SAP["textoBreveCare"],nombre_campo="Texto Care")
 
 def get_aviso_tipo(session):
-    return _get_sap_field(session, RUTAS_SAP["aviso_tipo"],"Tipo de aviso")
+    return _get_sap_field(session, RUTAS_SAP["aviso_tipo"],nombre_campo="Tipo de aviso")
     
 def get_aviso_autor(session):
-    return _get_sap_field(session, RUTAS_SAP["aviso_autor"],"Autor del aviso",caret_position=5)
+    return _get_sap_field(session, RUTAS_SAP["aviso_autor"],nombre_campo="Autor del aviso",caret_position=5)
     
 def get_aviso_fecha(session):
-    return _get_sap_field(session, RUTAS_SAP["aviso_fecha"],"Fecha del aviso",caret_position=5)
+    return _get_sap_field(session, RUTAS_SAP["aviso_fecha"],nombre_campo="Fecha del aviso",caret_position=5)
         
 def get_aviso_servicio(session):
-    return _get_sap_field(session, RUTAS_SAP["aviso_servicio"],"Tipo de aviso",caret_position=23)
+    return _get_sap_field(session, RUTAS_SAP["aviso_servicio"],nombre_campo="Tipo de aviso",caret_position=23)
 
 def getter_care(session):
     """Obtiene todos los valores válidos de los campos LTXA1 y ARBEI de la operación actual y los devuelve en formato tabla ordenado."""

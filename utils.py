@@ -8,6 +8,7 @@ import csv
 from pausa import pausa_por_consola, traer_consola_al_frente
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
+from constantes import RUTA_SAP_DESCARGAS
 
 #entrar a came seleccionada desde IW38
 
@@ -357,42 +358,18 @@ def cgi(session):
 def mostrar_datos(carpeta_acta=None):
     # Guardar los datos actuales antes de mostrarlos
     guardar_datos_ultimo()
+    _mostrar_tabla_datos(datos)
 
-    # Calcular el ancho máximo para alinear columnas
-    max_key_width = max(len("Clase de actividad aviso"), len("Ubicacion Tecnica"), len("Texto Breve"))
-    max_value_width = 50
+    # Si se proporcionó carpeta_acta, guardar archivos relacionados (pero NO mover)
+    if carpeta_acta:
+        # Guardar datos en archivo txt
+        guardar_datos_txt(carpeta_acta, datos)
+        # Agregar datos al CSV histórico
+        agregar_datos_csv(carpeta_acta)
+        print(f"\nDatos guardados en: {carpeta_acta}")
 
-    # Crear separador
-    separator = "+" + "-" * (max_key_width + 2) + "+" + "-" * (max_value_width + 2) + "+"
-
-    print("\n" + separator)
-
-    # Texto Breve
-    print(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos['Texto Breve'] or '').ljust(max_value_width)} |")
-    print(separator)
-
-    # Ubicaciones
-    print(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos['Ubicacion Tecnica'] or '').ljust(max_value_width)} |")
-    print(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos['Ubicacion Aviso'] or '').ljust(max_value_width)} |")
-    print(separator)
-
-    # Clases de Actividad
-    print(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos['Clase de actividad'] or '').ljust(max_value_width)} |")
-    print(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos['Clase de actividad aviso'] or '').ljust(max_value_width)} |")
-    print(separator)
-
-    # Datos del Aviso
-    print(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos['Tipo Aviso'] or '').ljust(max_value_width)} |")
-    print(f"| {'Servicio'.ljust(max_key_width)} | {str(datos['Servicio'] or '').ljust(max_value_width)} |")
-    print(separator)
-
-    # Texto del aviso completo - dividir en líneas si es muy largo
-    aviso_text = str(datos['Aviso'] or '')
-    if len(aviso_text) <= max_value_width:
-        # Si cabe en una línea, mostrar normalmente
-        print(f"| {'Aviso'.ljust(max_key_width)} | {aviso_text.ljust(max_value_width)} |")
-    else:
-        # Si es muy largo, dividir en múltiples líneas
+def _formatear_texto_largo(aviso_text,max_value_width):
+        """Divide un texto largo en lineas de maximo max_value_width"""
         words = aviso_text.split()
         lines = []
         current_line = ""
@@ -418,26 +395,7 @@ def mostrar_datos(carpeta_acta=None):
         if current_line:
             lines.append(current_line)
 
-        # Mostrar la primera línea con la etiqueta "Aviso"
-        if lines:
-            print(f"| {'Aviso'.ljust(max_key_width)} | {lines[0].ljust(max_value_width)} |")
-            # Mostrar las líneas restantes con etiqueta vacía
-            for line in lines[1:]:
-                print(f"| {' '.ljust(max_key_width)} | {line.ljust(max_value_width)} |")
-        else:
-            print(f"| {'Aviso'.ljust(max_key_width)} | {' '.ljust(max_value_width)} |")
-
-    print(separator)
-
-    # Si se proporcionó carpeta_acta, guardar archivos relacionados (pero NO mover)
-    if carpeta_acta:
-        # Guardar datos en archivo txt
-        guardar_datos_txt(carpeta_acta, datos)
-
-        # Agregar datos al CSV histórico
-        agregar_datos_csv(carpeta_acta)
-
-        print(f"\nDatos guardados en: {carpeta_acta}")
+        return lines
 
 def salir(session):
     """Simula presionar F3 y luego ENTER para salir"""
@@ -460,104 +418,22 @@ def guardar_datos_ultimo():
         print(f"Error al guardar los datos: {e}")
 
 def mostrar_ultimo_guardado():
+
     """Muestra los datos del último guardado desde el archivo JSON"""
-    try:
         # Verificar si existe el archivo
-        if not os.path.exists("ultimo_guardado.json"):
-            print("\nNo hay datos guardados anteriormente.")
-            return
+    if not os.path.exists("ultimo_guardado.json"):
+        print("\nNo hay datos guardados anteriormente.")
+        return
         
-        # Cargar datos del archivo
-        with open("ultimo_guardado.json", "r", encoding="utf-8") as archivo:
-            datos_guardados = json.load(archivo)
+    # Cargar datos del archivo
+    with open("ultimo_guardado.json", "r", encoding="utf-8") as archivo:
+        datos_guardados = json.load(archivo)
         
-        # Mostrar timestamp si existe
-        if "timestamp" in datos_guardados:
-            print(f"\nÚltimos datos guardados el: {datos_guardados['timestamp']}")
+    # Mostrar timestamp si existe
+    if "timestamp" in datos_guardados:
+        print(f"\nÚltimos datos guardados el: {datos_guardados['timestamp']}")
         
-        # Calcular el ancho máximo para alinear columnas
-        max_key_width = max(len("Clase de actividad aviso"), len("Ubicacion Tecnica"), len("Texto Breve"))
-        max_value_width = 50
-        
-        # Crear separador
-        separator = "+" + "-" * (max_key_width + 2) + "+" + "-" * (max_value_width + 2) + "+"
-        
-        print("\n" + separator)
-        
-        # Texto Breve
-        print(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos_guardados.get('Texto Breve', '') or '').ljust(max_value_width)} |")
-        print(separator)
-        
-        # Ubicaciones
-        print(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos_guardados.get('Ubicacion Tecnica', '') or '').ljust(max_value_width)} |")
-        print(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos_guardados.get('Ubicacion Aviso', '') or '').ljust(max_value_width)} |")
-        print(separator)
-        
-        # Clases de Actividad
-        print(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos_guardados.get('Clase de actividad', '') or '').ljust(max_value_width)} |")
-        print(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos_guardados.get('Clase de actividad aviso', '') or '').ljust(max_value_width)} |")
-        print(separator)
-        
-        # Datos del Aviso
-        print(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos_guardados.get('Tipo Aviso', '') or '').ljust(max_value_width)} |")
-        print(f"| {'Servicio'.ljust(max_key_width)} | {str(datos_guardados.get('Servicio', '') or '').ljust(max_value_width)} |")
-        print(separator)
-        
-        # Texto del aviso completo - dividir en líneas si es muy largo
-        aviso_text = str(datos_guardados.get('Aviso', '') or '')
-        if len(aviso_text) <= max_value_width:
-            # Si cabe en una línea, mostrar normalmente
-            print(f"| {'Aviso'.ljust(max_key_width)} | {aviso_text.ljust(max_value_width)} |")
-        else:
-            # Si es muy largo, dividir en múltiples líneas
-            words = aviso_text.split()
-            lines = []
-            current_line = ""
-            
-            for word in words:
-                # Si agregar la palabra no excede el límite
-                if len(current_line + " " + word if current_line else word) <= max_value_width:
-                    current_line = current_line + " " + word if current_line else word
-                else:
-                    # Si la línea actual no está vacía, guardarla
-                    if current_line:
-                        lines.append(current_line)
-                    # Si la palabra sola es más larga que el ancho máximo, cortarla
-                    if len(word) > max_value_width:
-                        while len(word) > max_value_width:
-                            lines.append(word[:max_value_width])
-                            word = word[max_value_width:]
-                        current_line = word if word else ""
-                    else:
-                        current_line = word
-            
-            # Agregar la última línea si no está vacía
-            if current_line:
-                lines.append(current_line)
-            
-            # Mostrar la primera línea con la etiqueta "Aviso"
-            if lines:
-                print(f"| {'Aviso'.ljust(max_key_width)} | {lines[0].ljust(max_value_width)} |")
-                # Mostrar las líneas restantes con etiqueta vacía
-                for line in lines[1:]:
-                    print(f"| {' '.ljust(max_key_width)} | {line.ljust(max_value_width)} |")
-            else:
-                print(f"| {'Aviso'.ljust(max_key_width)} | {' '.ljust(max_value_width)} |")
-        
-        print(separator)
-        
-        # Mostrar datos CARE (Itemizado) si están disponibles
-        if datos_guardados.get("Datos CARE"):
-            print("\n\nDatos CARE (Itemizado):")
-            print(datos_guardados["Datos CARE"])
-        
-        # Mostrar datos CAME (Cargado) si están disponibles
-        if datos_guardados.get("Datos CAME"):
-            print("\n\nDatos CAME (Cargado):")
-            print(datos_guardados["Datos CAME"])
-        
-    except Exception as e:
-        print(f"Error al cargar los datos guardados: {e}")
+    _mostrar_tabla_datos(datos_guardados)
 
 def sanitizar_nombre_carpeta(texto):
     """Convierte un texto en un nombre de carpeta válido"""
@@ -604,7 +480,7 @@ def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
         sufijo: Sufijo a agregar al nombre (ej: "CAME", "CARE")
     """
     try:
-        ruta_sap = r"C:\Users\nahue\OneDrive\Documentos\SAP\SAP GUI"
+        ruta_sap = RUTA_SAP_DESCARGAS
 
         # Verificar si la carpeta de origen existe
         if not os.path.exists(ruta_sap):
@@ -683,26 +559,8 @@ def guardar_datos_txt(carpeta_destino, datos_dict):
         if len(aviso_text) <= max_value_width:
             lineas.append(f"| {'Aviso'.ljust(max_key_width)} | {aviso_text.ljust(max_value_width)} |")
         else:
-            words = aviso_text.split()
-            lines = []
-            current_line = ""
 
-            for word in words:
-                if len(current_line + " " + word if current_line else word) <= max_value_width:
-                    current_line = current_line + " " + word if current_line else word
-                else:
-                    if current_line:
-                        lines.append(current_line)
-                    if len(word) > max_value_width:
-                        while len(word) > max_value_width:
-                            lines.append(word[:max_value_width])
-                            word = word[max_value_width:]
-                        current_line = word if word else ""
-                    else:
-                        current_line = word
-
-            if current_line:
-                lines.append(current_line)
+            lines = _formatear_texto_largo(aviso_text, max_value_width)
 
             if lines:
                 lineas.append(f"| {'Aviso'.ljust(max_key_width)} | {lines[0].ljust(max_value_width)} |")
@@ -784,3 +642,54 @@ def agregar_datos_csv(carpeta_destino):
     except Exception as e:
         print(f"Error al agregar datos a CSV: {e}")
         return None
+
+def _mostrar_tabla_datos(datos_dict):
+
+    # Calcular el ancho máximo para alinear columnas
+    max_key_width = max(len("Clase de actividad aviso"), len("Ubicacion Tecnica"), len("Texto Breve"))
+    max_value_width = 50
+
+    # Crear separador
+    separator = "+" + "-" * (max_key_width + 2) + "+" + "-" * (max_value_width + 2) + "+"
+
+    print("\n" + separator)
+
+    # Texto Breve
+    print(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos['Texto Breve'] or '').ljust(max_value_width)} |")
+    print(separator)
+
+    # Ubicaciones
+    print(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos['Ubicacion Tecnica'] or '').ljust(max_value_width)} |")
+    print(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos['Ubicacion Aviso'] or '').ljust(max_value_width)} |")
+    print(separator)
+
+    # Clases de Actividad
+    print(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos['Clase de actividad'] or '').ljust(max_value_width)} |")
+    print(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos['Clase de actividad aviso'] or '').ljust(max_value_width)} |")
+    print(separator)
+
+    # Datos del Aviso
+    print(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos['Tipo Aviso'] or '').ljust(max_value_width)} |")
+    print(f"| {'Servicio'.ljust(max_key_width)} | {str(datos['Servicio'] or '').ljust(max_value_width)} |")
+    print(separator)
+
+    # Texto del aviso completo - dividir en líneas si es muy largo
+    aviso_text = str(datos['Aviso'] or '')
+    if len(aviso_text) <= max_value_width:
+        # Si cabe en una línea, mostrar normalmente
+        print(f"| {'Aviso'.ljust(max_key_width)} | {aviso_text.ljust(max_value_width)} |")
+    else:
+
+        lines = _formatear_texto_largo(aviso_text, max_value_width)
+
+        # Mostrar la primera línea con la etiqueta "Aviso"
+        if lines:
+            print(f"| {'Aviso'.ljust(max_key_width)} | {lines[0].ljust(max_value_width)} |")
+            # Mostrar las líneas restantes con etiqueta vacía
+            for line in lines[1:]:
+                print(f"| {' '.ljust(max_key_width)} | {line.ljust(max_value_width)} |")
+        else:
+            print(f"| {'Aviso'.ljust(max_key_width)} | {' '.ljust(max_value_width)} |")
+
+    print(separator)
+

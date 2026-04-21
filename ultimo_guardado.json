@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2428",
+  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2403",
   "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "VIDAL 3901-4000 Calzada",
-  "Ubicacion Aviso": "VIDAL 3990",
+  "Ubicacion Tecnica": "MISTRAL, GABRIELA 3201-3299 Acera Impar",
+  "Ubicacion Aviso": "MISTRAL, GABRIELA 3201-3299",
   "Clase de actividad aviso": "G01",
-  "Tipo Aviso": "OF",
+  "Tipo Aviso": "SU",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "VIDAL 3990",
-  "Datos CARE": "+------------+-----------+\n| TRABAJO    | ITEMIZADO |\n+------------+-----------+\n| VIDAL 3990 | 2         |\n+------------+-----------+\n| TOTAL GENERAL: 2.00    |\n+------------+-----------+",
-  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 0,5      |\n+----------------------+----------+\n| Subtotal: 0.50                  |\n+----------------------+----------+",
-  "timestamp": "2026-04-20 16:00:38"
+  "Aviso": "24.02.2026 12:38:13 UTC-3 CRMUSER (CRMUSER)Cuestionario24.02.2026 12:38:13 SUACI_CRM¿Por qué medio realizaste el trámite/servicio? Otro,____________________Nota de alta de incidente24.02.2026 12:38:13 SUACI_CRMvecina comenta que se esta realizando una obra en l a calle Gabrielamistral entre campana y cuenca, están colocando",
+  "Datos CARE": "+---------------------------------+-----------+\n| TRABAJO                         | ITEMIZADO |\n+---------------------------------+-----------+\n| MISTRAL, GABRIELA 3201-3299  MP | 0         |\n| MISTRAL, GABRIELA 3251          | 0         |\n| MISTRAL, GABRIELA Y CAMPANA     | 0         |\n+---------------------------------+-----------+\n| TOTAL GENERAL: 0.00                         |\n+---------------------------------+-----------+",
+  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 5,6      |\n+----------------------+----------+\n| Subtotal: 5.60                  |\n+----------------------+----------+",
+  "timestamp": "2026-04-21 10:20:11"
 }
