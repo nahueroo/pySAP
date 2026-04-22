@@ -1,4 +1,4 @@
-from scripts import principal_fotos, principal_pdf
+from scripts import principal
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 import os
 
@@ -20,9 +20,9 @@ def main():
         opcion = input("Opcion?\n")
 
         if opcion == "1":
-            principal_fotos()
+            principal("fotos")
         elif opcion == "2":
-            principal_pdf()
+            principal("pdf")
         elif opcion == "3":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")

@@ -3,7 +3,7 @@ from utils import *
 from sap_connection import obtener_session_sap
 from constantes import CANCEL
 
-def flujo_base(tipo_flujo):
+def principal(tipo):
     session = obtener_session_sap()
     if session is None:
         return  # Esto termina la función
@@ -12,10 +12,10 @@ def flujo_base(tipo_flujo):
     # Crear carpeta acta con el nombre del Texto Breve
     carpeta_acta = crear_carpeta_acta(datos.get("Texto Breve", "sin_nombre"))
 
-    if tipo_flujo == "fotos":
+    if tipo == "fotos":
         ver_fotos_en_came(session)
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
-    elif tipo_flujo == "documentos":
+    elif tipo == "pdf":
         ver_fotos_en_came_tecno(session)
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
 
@@ -37,9 +37,3 @@ def flujo_base(tipo_flujo):
     else:  # Usuario presionó ENTER (exit_code == 0)
         cgi(session)
         cerrar_pestanas_firefox()
-
-def flujo_fotos():
-    flujo_base("fotos")
-
-def flujo_documentos():
-    flujo_base("documentos")
