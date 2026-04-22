@@ -424,11 +424,20 @@ def mostrar_ultimo_guardado():
     if not os.path.exists("ultimo_guardado.json"):
         print("\nNo hay datos guardados anteriormente.")
         return
-        
-    # Cargar datos del archivo
-    with open("ultimo_guardado.json", "r", encoding="utf-8") as archivo:
-        datos_guardados = json.load(archivo)
-        
+    try:
+        # Cargar datos del archivo
+        with open("ultimo_guardado.json", "r", encoding="utf-8") as archivo:
+            datos_guardados = json.load(archivo)
+    except FileNotFoundError:
+        print("\nNo hay datos guardados anteriormente.")
+        return
+    except json.JSONDecodeError:
+        print("\nEl archivo de ultimo guardado esta corrupto.")
+        return
+    except OSError as e:
+        print(f"\nNo se pudo leer ultimo_guardado.json: {e}")
+        return
+    
     # Mostrar timestamp si existe
     if "timestamp" in datos_guardados:
         print(f"\nÚltimos datos guardados el: {datos_guardados['timestamp']}")
@@ -655,22 +664,22 @@ def _mostrar_tabla_datos(datos_dict):
     print("\n" + separator)
 
     # Texto Breve
-    print(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos['Texto Breve'] or '').ljust(max_value_width)} |")
+    print(f"| {'Texto Breve'.ljust(max_key_width)} | {str(datos_dict.get('Texto Breve') or '').ljust(max_value_width)} |")
     print(separator)
 
     # Ubicaciones
-    print(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos['Ubicacion Tecnica'] or '').ljust(max_value_width)} |")
-    print(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos['Ubicacion Aviso'] or '').ljust(max_value_width)} |")
+    print(f"| {'Ubicacion Tecnica'.ljust(max_key_width)} | {str(datos_dict.get('Ubicacion Tecnica') or '').ljust(max_value_width)} |")
+    print(f"| {'Ubicacion Aviso'.ljust(max_key_width)} | {str(datos_dict.get('Ubicacion Aviso') or '').ljust(max_value_width)} |")
     print(separator)
 
     # Clases de Actividad
-    print(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos['Clase de actividad'] or '').ljust(max_value_width)} |")
-    print(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos['Clase de actividad aviso'] or '').ljust(max_value_width)} |")
+    print(f"| {'Clase de actividad'.ljust(max_key_width)} | {str(datos_dict.get('Clase de actividad') or '').ljust(max_value_width)} |")
+    print(f"| {'Clase de actividad aviso'.ljust(max_key_width)} | {str(datos_dict.get('Clase de actividad aviso') or '').ljust(max_value_width)} |")
     print(separator)
 
     # Datos del Aviso
-    print(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos['Tipo Aviso'] or '').ljust(max_value_width)} |")
-    print(f"| {'Servicio'.ljust(max_key_width)} | {str(datos['Servicio'] or '').ljust(max_value_width)} |")
+    print(f"| {'Tipo Aviso'.ljust(max_key_width)} | {str(datos_dict.get('Tipo Aviso') or '').ljust(max_value_width)} |")
+    print(f"| {'Servicio'.ljust(max_key_width)} | {str(datos_dict.get('Servicio') or '').ljust(max_value_width)} |")
     print(separator)
 
     # Texto del aviso completo - dividir en líneas si es muy largo

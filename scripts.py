@@ -4,6 +4,11 @@ from sap_connection import obtener_session_sap
 from constantes import CANCEL
 
 def principal(tipo):
+
+    if tipo not in("fotos","pdf"):
+        print("Tipo invalido, usa 'fotos' o 'pdf'.")
+        return
+    
     session = obtener_session_sap()
     if session is None:
         return  # Esto termina la función
@@ -11,6 +16,9 @@ def principal(tipo):
 
     # Crear carpeta acta con el nombre del Texto Breve
     carpeta_acta = crear_carpeta_acta(datos.get("Texto Breve", "sin_nombre"))
+    if not carpeta_acta:
+        print("No se pudo crear la carpeta, script cancelado.")
+        return
 
     if tipo == "fotos":
         ver_fotos_en_came(session)
