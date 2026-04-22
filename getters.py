@@ -40,132 +40,121 @@ def get_aviso_servicio(session):
     return _get_sap_field(session, RUTAS_SAP["aviso_servicio"],nombre_campo="Tipo de aviso",caret_position=23)
 
 def getter_care(session):
-    """Obtiene todos los valores válidos de los campos LTXA1 y ARBEI de la operación actual y los devuelve en formato tabla ordenado."""
-    ltxa1_list = []
-    arbei_list = []
-    row = 0
-    
-    # Recopilar datos
-    while True:
-        try:
-            ltxa1 = session.findById(f"{LTXA1}[7,{row}]").text
-            arbei = session.findById(f"{ARBEI}[10,{row}]").text
-            if ltxa1.strip() and not ltxa1.startswith("_") and ltxa1 != "":
-                ltxa1_list.append(ltxa1)
-                arbei_list.append(arbei)
-            row += 1
-        except Exception:
-            break
-    
-    # Si no hay datos, devolver string vacío
-    if not ltxa1_list:
-        return ""
-    
-    # Combinar y ordenar por TRABAJO (alfabéticamente)
-    combined_data = list(zip(ltxa1_list, arbei_list))
-    combined_data.sort(key=lambda x: x[0].lower())
-    
-    # Calcular anchos máximos para justificación
-    max_trabajo_width = max(len("TRABAJO"), max(len(trabajo) for trabajo, _ in combined_data))
-    max_itemizado_width = max(len("ITEMIZADO"), max(len(itemizado) for _, itemizado in combined_data))
-    
-    # Crear tabla formateada
-    separator = "+" + "-" * (max_trabajo_width + 2) + "+" + "-" * (max_itemizado_width + 2) + "+"
-    header = f"| {'TRABAJO'.ljust(max_trabajo_width)} | {'ITEMIZADO'.ljust(max_itemizado_width)} |"
-    
-    result = [separator, header, separator]
-    
-    # Agregar datos sin subtotales
-    for trabajo, itemizado in combined_data:
-        row = f"| {trabajo.ljust(max_trabajo_width)} | {itemizado.ljust(max_itemizado_width)} |"
-        result.append(row)
-    
-    result.append(separator)
-    
-    # Total general
-    try:
-        all_itemizados = [float(itemizado.replace(',', '.')) for _, itemizado in combined_data if itemizado.strip()]
-        total_value = sum(all_itemizados)
-        total_text = f"TOTAL GENERAL: {total_value:.2f}"
-    except (ValueError, TypeError):
-        total_text = f"TOTAL GENERAL: {len(combined_data)} item(s)"
-    
-    total_row = f"| {total_text.ljust(max_trabajo_width + max_itemizado_width + 3)} |"
-    result.append(total_row)
-    result.append(separator)
-    
-    return "\n".join(result)
+    return get_operaciones(session,"care")
 
 def getter_came(session):
-    """Obtiene todos los valores válidos de los campos LTXA1 y DAUNO de la operación actual y los devuelve en formato tabla ordenado con subtotales."""
+    return get_operaciones(session, "came")
+
+def _es_fila_valida(texto):
+    """Valida si una fila tiene contenido válido"""
+    return texto.strip() and not texto.startswith("_")
+
+def _calcular_anchos_tabla(headers, datos):
+    """Calcula los anchos máximos para alineación"""
+    anchos = [len(h) for h in headers]
+    for fila in datos:
+        for i, valor in enumerate(fila):
+            anchos[i] = max(anchos[i], len(str(valor)))
+    return anchos
+
+def _crear_separador(anchos):
+    """Crea separador de tabla"""
+    return "+" + "+".join("-" * (a + 2) for a in anchos) + "+"
+
+def _crear_header(headers, anchos):
+    """Crea header de tabla"""
+    return "|" + "|".join(f" {h.ljust(a)} " for h, a in zip(headers, anchos)) + "|"
+
+def _crear_fila_tabla(valores, anchos):
+    """Crea una fila de tabla"""
+    return "|" + "|".join(f" {str(v).ljust(a)} " for v, a in zip(valores, anchos)) + "|"
+
+def get_operaciones(session,orden):
+
     ltxa1_list = []
-    dauno_list = []
+    orden_list = []
     row = 0
+
+    # Mapeo de orden -> (campo,indice)
+    config_orden = {
+        "care": (ARBEI, 10),
+        "came": (DAUNO, 13)
+    }
+    if orden not in config_orden:
+        return ""
     
+    campo,index = config_orden[orden]
+
     # Recopilar datos
     while True:
         try:
             ltxa1 = session.findById(f"{LTXA1}[7,{row}]").text
-            dauno = session.findById(f"{DAUNO}[13,{row}]").text
-            if ltxa1.strip() and not ltxa1.startswith("_") and ltxa1 != "":
+            valor = session.findById(f"{campo}[{index},{row}]").text
+            if _es_fila_valida(ltxa1):
                 ltxa1_list.append(ltxa1)
-                dauno_list.append(dauno)
+                orden_list.append(valor)
             row += 1
         except Exception:
             break
-    
-    # Si no hay datos, devolver string vacío
+
+    # Si no hay datos, devolver string vacio
     if not ltxa1_list:
         return ""
-    
-    # Combinar y ordenar por TRABAJO (alfabéticamente)
-    combined_data = list(zip(ltxa1_list, dauno_list))
+
+    # Combinar y ordenar por Trabajo (alfabeticamente)
+    combined_data = list(zip(ltxa1_list, orden_list))
     combined_data.sort(key=lambda x: x[0].lower())
+
+    # Headers y columnas
+    headers = ["TRABAJO", "CANTIDAD" if orden == "came" else "ITEMIZADO"]
+    anchos = _calcular_anchos_tabla(headers, combined_data)
+
+    result = [_crear_separador(anchos), _crear_header(headers, anchos), _crear_separador(anchos)]
+
+    if orden == "came":
+        # Agrupar por trabajo para subtotales
+        from collections import defaultdict
+        grouped_data = defaultdict(list)
+        for trabajo, cantidad in combined_data:
+            grouped_data[trabajo].append(cantidad)
+
+        # Agregar datos agrupados con subtotales
+        for trabajo in sorted(grouped_data.keys(), key=str.lower):
+            cantidades = grouped_data[trabajo]
+
+            # Primera fila del grupo
+            result.append(_crear_fila_tabla([trabajo, cantidades[0]], anchos))
+
+            # Filas adicionales del groupo(trabajo vacio)
+            for cantidad in cantidades[1:]:
+                result.append(_crear_fila_tabla(["", cantidad], anchos))
+
+            # Calcular el subtotal numerico si las cantidades son numeros
+            try:
+                numeric = [float(c.replace(',', '.')) for c in cantidades if c.strip()]
+                subtotal_text = f"Subtotal: {sum(numeric):.2f}"
+            except (ValueError, TypeError):
+                subtotal_text = f"Subtotal: {len(cantidades)} item(s)"
+
+            result.append(_crear_separador(anchos))
+            result.append(_crear_fila_tabla([subtotal_text, ""], anchos))
+            result.append(_crear_separador(anchos))
     
-    # Agrupar por trabajo para subtotales
-    from collections import defaultdict
-    grouped_data = defaultdict(list)
-    for trabajo, cantidad in combined_data:
-        grouped_data[trabajo].append(cantidad)
-    
-    # Calcular anchos máximos para justificación
-    max_trabajo_width = max(len("TRABAJO"), max(len(trabajo) for trabajo in grouped_data.keys()))
-    max_cantidad_width = max(len("CANTIDAD"), max(len(item) for sublist in grouped_data.values() for item in sublist))
-    
-    # Crear tabla formateada
-    separator = "+" + "-" * (max_trabajo_width + 2) + "+" + "-" * (max_cantidad_width + 2) + "+"
-    header = f"| {'TRABAJO'.ljust(max_trabajo_width)} | {'CANTIDAD'.ljust(max_cantidad_width)} |"
-    
-    result = [separator, header, separator]
-    
-    # Agregar datos agrupados con subtotales
-    for trabajo in sorted(grouped_data.keys(), key=str.lower):
-        cantidades = grouped_data[trabajo]
+    else: # orden == "care"
+        for trabajo, itemizado in combined_data:
+            result.append(_crear_fila_tabla([trabajo, itemizado], anchos))
         
-        # Primera fila del grupo
-        first_row = f"| {trabajo.ljust(max_trabajo_width)} | {cantidades[0].ljust(max_cantidad_width)} |"
-        result.append(first_row)
+        result.append(_crear_separador(anchos))
         
-        # Filas adicionales del grupo (trabajo vacío)
-        for cantidad in cantidades[1:]:
-            additional_row = f"| {' '.ljust(max_trabajo_width)} | {cantidad.ljust(max_cantidad_width)} |"
-            result.append(additional_row)
-        
-        # Calcular subtotal numérico si las cantidades son números
+        # Calcular total general
         try:
-            numeric_cantidades = [float(c.replace(',', '.')) for c in cantidades if c.strip()]
-            subtotal_value = sum(numeric_cantidades)
-            subtotal_text = f"Subtotal: {subtotal_value:.2f}"
+            numeric = [float(v.replace(',', '.')) for _, v in combined_data if v.strip()]
+            total_text = f"TOTAL GENERAL: {sum(numeric):.2f}"
         except (ValueError, TypeError):
-            subtotal_text = f"Subtotal: {len(cantidades)} item(s)"
+            total_text = f"TOTAL GENERAL: {len(combined_data)} item(s)"
         
-        # Subtotal del grupo
-        subtotal_separator = "+" + "-" * (max_trabajo_width + 2) + "+" + "-" * (max_cantidad_width + 2) + "+"
-        subtotal_row = f"| {subtotal_text.ljust(max_trabajo_width + max_cantidad_width + 3)} |"
-        result.append(subtotal_separator)
-        result.append(subtotal_row)
-        result.append(separator)
-    
+        result.append(_crear_fila_tabla([total_text, ""], anchos))
+        result.append(_crear_separador(anchos))
     return "\n".join(result)
 
 def get_texto_largo_aviso(session):
@@ -185,9 +174,9 @@ def get_texto_largo_aviso(session):
         
         # Ruta base para la tabla de texto largo
         base_ruta = (r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/"
-                     r"ssubSUB_GROUP_10:SAPLIQS0:7235/"
-                     r"subCUSTOM_SCREEN:SAPLIQS0:7212/"
-                     r"subSUBSCREEN_1:SAPLIQS0:7710/")
+                    r"ssubSUB_GROUP_10:SAPLIQS0:7235/"
+                    r"subCUSTOM_SCREEN:SAPLIQS0:7212/"
+                    r"subSUBSCREEN_1:SAPLIQS0:7710/")
         
         tabla_ruta = base_ruta + "tblSAPLIQS0TEXT"
         

@@ -1,3 +1,4 @@
 actas/
 historico_actas.csv
 ultimo_guardado.json
+__pycache__/
