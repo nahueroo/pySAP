@@ -1,5 +1,5 @@
 import win32com.client
-from constantes import RUTAS_SAP
+from constantes import RUTAS_SAP, LTXA1,DAUNO,ARBEI
 
 def _get_sap_field(session, ruta, nombre_campo="", caret_position=None):
     try:
@@ -48,8 +48,8 @@ def getter_care(session):
     # Recopilar datos
     while True:
         try:
-            ltxa1 = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-LTXA1[7,{row}]").text
-            arbei = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-ARBEI[10,{row}]").text
+            ltxa1 = session.findById(f"{LTXA1}[7,{row}]").text
+            arbei = session.findById(f"{ARBEI}[10,{row}]").text
             if ltxa1.strip() and not ltxa1.startswith("_") and ltxa1 != "":
                 ltxa1_list.append(ltxa1)
                 arbei_list.append(arbei)
@@ -105,8 +105,8 @@ def getter_came(session):
     # Recopilar datos
     while True:
         try:
-            ltxa1 = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-LTXA1[7,{row}]").text
-            dauno = session.findById(f"wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpVGUE/ssubSUB_AUFTRAG:SAPLCOVG:3010/tblSAPLCOVGTCTRL_3010/txtAFVGD-DAUNO[13,{row}]").text
+            ltxa1 = session.findById(f"{LTXA1}[7,{row}]").text
+            dauno = session.findById(f"{DAUNO}[13,{row}]").text
             if ltxa1.strip() and not ltxa1.startswith("_") and ltxa1 != "":
                 ltxa1_list.append(ltxa1)
                 dauno_list.append(dauno)
