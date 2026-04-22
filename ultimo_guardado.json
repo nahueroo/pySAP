@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2445",
+  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2444",
   "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "SAN ISIDRO LABRADOR AV. 4701-4799 Cal",
-  "Ubicacion Aviso": "SAN ISIDRO LABRADOR 4722 Y DEHEZA",
+  "Ubicacion Tecnica": "VIDAL 4501-4600 Calzada",
+  "Ubicacion Aviso": "VIDAL 4586",
   "Clase de actividad aviso": "G01",
   "Tipo Aviso": "OF",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "SAN ISIDRO LABRADOR 4722 Y DEHEZA",
-  "Datos CARE": "+-----------------------------------+-----------+\n| TRABAJO                           | ITEMIZADO |\n+-----------------------------------+-----------+\n| SAN ISIDRO LABRADOR 4722 Y DEHEZA | 3         |\n| SAN ISIDRO LABRADOR 4722 Y DEHEZA | 3         |\n+-----------------------------------+-----------+\n| TOTAL GENERAL: 6.00               |           |\n+-----------------------------------+-----------+",
-  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 1,4      |\n|                      | 2,1      |\n+----------------------+----------+\n| Subtotal: 3.50       |          |\n+----------------------+----------+",
-  "timestamp": "2026-04-22 12:20:02"
+  "Aviso": "VIDAL 4586",
+  "Datos CARE": "+------------+-----------+\n| TRABAJO    | ITEMIZADO |\n+------------+-----------+\n| VIDAL 4586 | 3         |\n+------------+-----------+\n| TOTAL GENERAL: 3.00 |           |\n+------------+-----------+",
+  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 1,3      |\n+----------------------+----------+\n| Subtotal: 1.30       |          |\n+----------------------+----------+",
+  "timestamp": "2026-04-22 12:51:42"
 }

@@ -12,10 +12,10 @@ def flujo_base(tipo_flujo):
     # Crear carpeta acta con el nombre del Texto Breve
     carpeta_acta = crear_carpeta_acta(datos.get("Texto Breve", "sin_nombre"))
 
-    if tipo_flujo == "general":
+    if tipo_flujo == "fotos":
         ver_fotos_en_came(session)
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
-    elif tipo_flujo == "tecnovias":
+    elif tipo_flujo == "documentos":
         ver_fotos_en_came_tecno(session)
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
 
@@ -38,8 +38,8 @@ def flujo_base(tipo_flujo):
         cgi(session)
         cerrar_pestanas_firefox()
 
-def flujo_general():
-    flujo_base("general")
+def flujo_fotos():
+    flujo_base("fotos")
 
-def flujo_tecnovias():
-    flujo_base("tecnovias")
+def flujo_documentos():
+    flujo_base("documentos")

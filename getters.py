@@ -183,6 +183,7 @@ def get_texto_largo_aviso(session):
         # Set para evitar duplicados exactos
         lineas_unicas = set()
         lineas_ordenadas = []
+        estrategia_usada = None
         
         # Obtener referencia a la tabla
         tabla = session.findById(tabla_ruta)
@@ -218,6 +219,9 @@ def get_texto_largo_aviso(session):
                         
             except:
                 continue
+
+        if lineas_ordenadas:
+            estrategia_usada = "Principal (scroll directo)"
         
         # Segundo: navegar con scroll si hay más filas
         if total_filas > filas_visibles:
@@ -249,6 +253,7 @@ def get_texto_largo_aviso(session):
         
         # ESTRATEGIA ALTERNATIVA: Si lo anterior no funcionó bien, usar firstVisibleRow
         if len(lineas_ordenadas) < 3:  # Si obtuvimos muy poco contenido
+            lineas_previas = len(lineas_ordenadas)
             try:
                 # Resetear
                 tabla.firstVisibleRow = 0
@@ -277,15 +282,22 @@ def get_texto_largo_aviso(session):
                         
             except:
                 pass
+
+            if len(lineas_ordenadas) > lineas_previas:
+                estrategia_usada = "Alternativa (firstVisibleRow)"
         
         # ESTRATEGIA DE RESPALDO: Acceso directo por índices
         if len(lineas_ordenadas) < 2:  # Si aún tenemos muy poco contenido
+            lineas_previas = len(lineas_ordenadas)
             # Resetear tabla
             try:
                 if hasattr(tabla, 'verticalScrollbar'):
                     tabla.verticalScrollbar.position = 0
             except:
                 pass
+
+            if len(lineas_ordenadas) > lineas_previas:
+                estrategia_usada = "Respaldo (acceso directo)"
             
             # Intentar acceso directo
             for indice in range(min(100, total_filas * 2)):
@@ -303,14 +315,16 @@ def get_texto_largo_aviso(session):
         
         # Construir resultado final
         if not lineas_ordenadas:
+            print(f"[get_texto_largo_aviso] No se obtuvieron líneas")
             return None
         
         # Unir todas las líneas preservando saltos de línea
         texto_completo = "\n".join(lineas_ordenadas)
-        
+        print(f"[get_texto_largo_aviso] Estrategia exitosa: {estrategia_usada} | Líneas obtenidas: {len(lineas_ordenadas)}")
         return texto_completo if texto_completo.strip() else None
         
     except Exception as e:
+        print(f"[get_texto_largo_aviso] Error general: {e}")
         return None
 
 

@@ -1,11 +1,11 @@
-from scripts import flujo_general, flujo_tecnovias
+from scripts import principal_fotos, principal_pdf
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 import os
 
 def mostrar_menu():
     print("\n---MENU ---")
-    print("1. General")
-    print("2. Tecnovias")
+    print("1. Fotos/PDF")
+    print("2. Directo PDF")
     print("3. Mostrar ultimo guardado")
     print("4. Salir")
 
@@ -20,9 +20,9 @@ def main():
         opcion = input("Opcion?\n")
 
         if opcion == "1":
-            flujo_general()
+            principal_fotos()
         elif opcion == "2":
-            flujo_tecnovias()
+            principal_pdf()
         elif opcion == "3":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
