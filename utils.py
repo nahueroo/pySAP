@@ -2,7 +2,6 @@ import time
 import pyautogui
 import json
 import os
-import ctypes
 import shutil
 import csv
 from pausa import pausa_por_consola, traer_consola_al_frente
@@ -19,66 +18,44 @@ def ingreso_a_came(session):
     datos["Clase de actividad"] = get_claseActividad(session)
     datos["Ubicacion Tecnica"] = get_UT(session)
 
-
-def ver_fotos_en_came(session):
+def ver_fotos_en_came(session, modo):
     session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
+
+    if modo == "fotos":
+        abrir_fotos_came(session)
+        if not abrir_fotos_came:
+            abrir_pdf_came(session)
+    elif modo == "pdf":
+        abrir_pdf_came(session)
+
+def abrir_fotos_came(session):
     
     #Abre Visualizar imagenes
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
     
-    # Espera inteligente a que aparezca el popup
+    # Espera a que aparezca el popup
     if esperar_popup(session, timeout=3):
         # presiona el botón Aceptar en el popup
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
-        
-        # abre Lista de documentos
-        session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
-        
-        # Espera inteligente a que aparezca el popup
-        if esperar_popup(session, timeout=3):
-            # presiona el botón Aceptar en el popup
-            session.findById("wnd[1]/tbar[0]/btn[0]").press()
+        return False
+    
+    return True
 
-            session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
-            
-            # Espera a que aparezca la ventana con la grid
-            if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
-                grid = session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell")
-                
-                # Obtener el número total de filas en la grid
-                row_count = grid.RowCount
-                
-                # Iterar a través de todas las filas
-                for row_index in range(row_count):
-                    try:
-                        # Seleccionar la fila actual
-                        grid.currentCellRow = row_index
-                        grid.currentCellColumn = "NOMBRE"
-                        
-                        # Verificar si la celda tiene contenido
-                        cell_value = grid.getCellValue(row_index, "NOMBRE")
-                        
-                        # Si la celda está vacía, terminar el bucle
-                        if not cell_value or cell_value.strip() == "":
-                            break
-                        
-                        # Hacer doble clic en la celda con contenido
-                        grid.doubleClickCurrentCell()
-                        
-                        # Pequeña pausa entre selecciones para estabilidad
-                        time.sleep(0.5)
-                        
-                    except Exception as e:
-                        # Si hay error al acceder a una fila, probablemente llegamos al final
-                        print(f"Error al procesar fila {row_index}: {e}")
-                        break
-                
-                # Cerrar las ventanas después de procesar todas las filas
-                session.findById("wnd[1]").close()
-                session.findById("wnd[0]/shellcont").close()
+def abrir_doc_list_came(session):
+    
+    # abre Lista de documentos
+    session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
+    
+    # Espera a que aparezca el popup
+    if esperar_popup(session, timeout=3):
+        # presiona el botón Aceptar en el popup
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+        return False
+    
+    return True
 
-def ver_fotos_en_came_tecno(session):
-    session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
+def abrir_pdf_came(session):
+
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
     
     # Espera a que aparezca la ventana con la grid
@@ -131,7 +108,7 @@ def ver_fotos_en_care(session):
     fotos_encontradas_row1a = True
     fotos_encontradas_row1b = True
     
-    # Primera fila (row 0) - exactamente como antes
+    # Primera fila (row 0)
     session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
 
     session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(0).selected = True
@@ -154,14 +131,14 @@ def ver_fotos_en_care(session):
             session.findById("wnd[1]/tbar[0]/btn[0]").press()
             fotos_encontradas_row0b = False
 
-    # Segunda fila (row 1) - exactamente como antes
+    # Segunda fila (row 1)
     session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
 
     session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(1).selected = True
     session.findById("wnd[1]").sendVKey(0)
     session.findById("wnd[0]/shellcont[1]/shell").pressButton("VIEW_IMAG")
     
-    # Espera inteligente a que aparezca el popup
+    # Espera a que aparezca el popup
     if session.Children.Count > 1:
         # presiona el botón Aceptar en el popup
         session.findById("wnd[1]/tbar[0]/btn[0]").press()

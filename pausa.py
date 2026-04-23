@@ -4,7 +4,7 @@ import time
 from constantes import CONTINUE, CANCEL, ENTER, ESCAPE
 
 def traer_consola_al_frente():
-    """Trae la ventana de la consola al frente - versión simple que funciona"""
+
     try:
         # Obtener el handle de la ventana de la consola
         kernel32 = ctypes.windll.kernel32
@@ -26,15 +26,15 @@ def traer_consola_al_frente():
 def pausa_por_consola():
     traer_consola_al_frente()  # Traer consola al frente antes de esperar input
     time.sleep(0.2)  # Dar tiempo a Windows para procesar el cambio de ventana
-    print("")
+    print("Presiona [ENTER] si la CAME esta correcta o [ESC] si tiene errores")
 
     while True:
         key = msvcrt.getch()
         if key == ENTER:
-            print("ok...")
+            print("CAME OK")
             return CONTINUE
         elif key == ESCAPE:
-            print("")
+            print("CAME con errores")
             return CANCEL
         else:
             print("")

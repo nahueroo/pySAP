@@ -21,10 +21,10 @@ def principal(tipo):
         return
 
     if tipo == "fotos":
-        ver_fotos_en_came(session)
+        ver_fotos_en_came(session,"fotos")
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
     elif tipo == "pdf":
-        ver_fotos_en_came_tecno(session)
+        ver_fotos_en_came(session,"pdf")
         mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
 
     entrar_a_care(session)

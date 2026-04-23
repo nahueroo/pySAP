@@ -3,7 +3,7 @@ from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 import os
 
 def mostrar_menu():
-    print("\n---MENU ---")
+    print("\n---MENU ---\b\b")
     print("1. Fotos/PDF")
     print("2. Directo PDF")
     print("3. Mostrar ultimo guardado")
@@ -30,7 +30,7 @@ def main():
             print("Saliendo...")
             break
         else:
-            print("Opcion invalida")
+            print("Opcion invalida, las opciones son [1],[2],[3] y [4]")
 
 
 if __name__ == "__main__":
