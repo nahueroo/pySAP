@@ -157,17 +157,8 @@ def get_operaciones(session,orden):
         result.append(_crear_separador(anchos))
     return "\n".join(result)
 
-def get_texto_largo_aviso(session):
-    """
-    Obtiene todo el contenido de texto largo de un aviso en SAP.
-    Versión que combina acceso directo e inteligente navegación con scroll.
-    
-    Args:
-        session: Sesión activa de SAP GUI
-    
-    Returns:
-        str: Texto completo del aviso concatenado, o None si hay error
-    """
+def get_texto_aviso(session):
+
     try:
         # Maximizar ventana para asegurar visibilidad completa
         session.findById("wnd[0]").maximize()
@@ -190,22 +181,27 @@ def get_texto_largo_aviso(session):
         # Obtener información básica de la tabla
         try:
             filas_visibles = tabla.visibleRowCount
+            print(f"try filas visibles: {filas_visibles}")
             total_filas = tabla.rowCount
+            print(f"try total filas: {total_filas}")
         except:
             filas_visibles = 4
+            print(f"except filas visibles: {filas_visibles}")
             total_filas = 20
+            print(f"except total filas: {total_filas}")
         
         # Resetear scroll al inicio
         try:
             if hasattr(tabla, 'verticalScrollbar'):
                 tabla.verticalScrollbar.position = 0
+                print(f"try tabla: {tabla}")
             if hasattr(tabla, 'firstVisibleRow'):
                 tabla.firstVisibleRow = 0
+                print(f"except table: {tabla}")
         except:
             pass
         
-        # ESTRATEGIA PRINCIPAL: Navegación sistemática con scroll
-        # Primero: explorar contenido visible inicial
+        # Explorar contenido visible inicial
         for fila in range(filas_visibles):
             try:
                 celda = session.findById(f"{tabla_ruta}/txtLTXTTAB2-TLINE[0,{fila}]")
@@ -219,7 +215,7 @@ def get_texto_largo_aviso(session):
             except:
                 continue
         
-        # Segundo: navegar con scroll si hay más filas
+        # Navegar con scroll si hay más filas
         if total_filas > filas_visibles:
             # Calcular cuántas posiciones de scroll necesitamos
             posiciones_scroll = range(1, total_filas - filas_visibles + 2)

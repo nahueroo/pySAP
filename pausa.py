@@ -24,8 +24,8 @@ def traer_consola_al_frente():
         print(f"Error al traer la consola al frente: {e}")
 
 def pausa_por_consola():
-    traer_consola_al_frente()  # Traer consola al frente antes de esperar input
-    time.sleep(0.2)  # Dar tiempo a Windows para procesar el cambio de ventana
+    traer_consola_al_frente()
+    time.sleep(0.2)
     print("Presiona [ENTER] si la CAME esta correcta o [ESC] si tiene errores")
 
     while True:
@@ -38,3 +38,15 @@ def pausa_por_consola():
             return CANCEL
         else:
             print("")
+
+def pausa():
+    teclaPresionada = pausa_por_consola()
+    if teclaPresionada == ENTER:
+        print("")
+        return ENTER
+    elif teclaPresionada == CANCEL:
+        print("")
+        return CANCEL
+    else:
+        print(f"Codigo de salida inesperado: {teclaPresionada}")
+        exit(teclaPresionada)

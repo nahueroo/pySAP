@@ -7,7 +7,7 @@ import csv
 from pausa import pausa_por_consola, traer_consola_al_frente
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
-from constantes import RUTA_SAP_DESCARGAS, MAUFNR
+from constantes import RUTA_SAP_DESCARGAS, MAUFNR, AVISO
 
 def ingreso_a_came(session):
     session.findById("wnd[0]").maximize()
@@ -99,13 +99,7 @@ def entrar_a_aviso(session):
         except Exception as e:
             break
     
-    # Verificar estado de la ventana antes de presionar el botón
-    try:
-        boton_aviso = session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/btnICON_NTF")
-    except Exception as e:
-        return
-    
-    session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/btnICON_NTF").press()
+    session.findById(AVISO).press()
     
     # Dar más tiempo para que se abra el aviso
     time.sleep(2)
@@ -119,19 +113,12 @@ def entrar_a_aviso(session):
         datos["Servicio"] = get_aviso_servicio(session)
         
         # Obtener texto largo del aviso en una sola línea
-        texto_largo = get_texto_largo_aviso(session)
+        texto_largo = get_texto_aviso(session)
         if texto_largo:
             # Convertir saltos de línea a espacios para que quede en una sola línea
             datos["Aviso"] = texto_largo.replace('\n', ' ').replace('\r', ' ')
         else:
-            datos["Aviso"] = "Sin texto largo disponible"
-    else:
-        # Intentar listar las ventanas disponibles
-        try:
-            for i in range(session.Children.Count):
-                ventana = session.Children(i)
-        except Exception as e:
-            pass
+            datos["Aviso"] = "Sin texto disponible"
 
 def aceptar_g02(session):
     session.findById("wnd[0]/tbar[0]/btn[3]").press()
@@ -152,19 +139,6 @@ def aceptar_g02(session):
             datos["Datos CARE"] = "No se encontraron datos CARE válidos."
             # Guardar inmediatamente en el archivo JSON
             guardar_datos_ultimo()
-
-def pausa():
-    traer_consola_al_frente()  # Traer consola al frente antes de la pausa
-    exit_code = pausa_por_consola()
-    if exit_code == 0:
-        print("")
-        return 0  # Continúa normalmente
-    elif exit_code == 1:
-        print("")
-        return 1  # Indica que se presionó ESC
-    else:
-        print(f"Codigo de salida inesperado: {exit_code}")
-        exit(exit_code)
 
 def aceptar_itemizado(session):
     session.findById("wnd[0]/tbar[0]/btn[3]").press()

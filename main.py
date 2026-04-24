@@ -3,6 +3,7 @@ from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 import os
 
 def mostrar_menu():
+
     print("\n---MENU ---\b\b")
     print("1. Fotos/PDF")
     print("2. Directo PDF")
@@ -18,6 +19,7 @@ def main():
         traer_consola_al_frente()  # Traer consola al frente cada vez que se muestra el menú
         mostrar_menu()
         opcion = input("Opcion?\n")
+
 
         if opcion == "1":
             principal("fotos")

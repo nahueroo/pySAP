@@ -1,5 +1,6 @@
 from cerrarpestanias import cerrar_pestanas_firefox
 from utils import *
+from pausa import pausa
 from sap_connection import obtener_session_sap
 from constantes import CANCEL
 
