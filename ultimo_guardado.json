@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2406",
-  "Clase de actividad": "G02",
-  "Ubicacion Tecnica": "MOSCONI GENERAL AV. 2802-2900 Acera Par",
-  "Ubicacion Aviso": "MOSCONI GENERAL AV. 2802",
-  "Clase de actividad aviso": "G02",
-  "Tipo Aviso": "EM",
-  "Autor Aviso": "FISCZONA12",
-  "Fecha Aviso": "23.01.2026",
-  "Servicio": "METROGAS S.A.-POS: 0000000050",
-  "Aviso": "Sin texto largo disponible",
-  "Datos CARE": "+------------------------------------+-----------+\n| TRABAJO                            | ITEMIZADO |\n+------------------------------------+-----------+\n| MOSCONI GENERAL AV. 2802 mixto asf | 2,5       |\n+------------------------------------+-----------+\n| TOTAL GENERAL: 2.50                |           |\n+------------------------------------+-----------+",
-  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 6.1.1_Cierre de aperturas de Servicios P | 4        |\n+------------------------------------------+----------+\n| Subtotal: 4.00                           |          |\n+------------------------------------------+----------+",
-  "timestamp": "2026-04-23 11:19:46"
+  "Texto Breve": "P6_2_Z10_R18_CERT_31_ACTA_2381",
+  "Clase de actividad": "G01",
+  "Ubicacion Tecnica": "LUGONES 4701-4800 Calzada",
+  "Ubicacion Aviso": "LUGONES 4777",
+  "Clase de actividad aviso": "G01",
+  "Tipo Aviso": "OF",
+  "Autor Aviso": null,
+  "Fecha Aviso": null,
+  "Servicio": null,
+  "Aviso": "26.02.2026 12:52:10 UTC-3 Nadia Carolina Bermejo (NBERMEJO) SERVICIO HUNDIDO EN CALZADA.",
+  "Datos CARE": "+--------------+-----------+\n| TRABAJO      | ITEMIZADO |\n+--------------+-----------+\n| LUGONES 4777 | 3,5       |\n+--------------+-----------+\n| TOTAL GENERAL: 3.50 |           |\n+--------------+-----------+",
+  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 2,3      |\n+----------------------+----------+\n| Subtotal: 2.30       |          |\n+----------------------+----------+",
+  "timestamp": "2026-04-24 10:40:43"
 }

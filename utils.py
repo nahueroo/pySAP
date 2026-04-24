@@ -7,9 +7,7 @@ import csv
 from pausa import pausa_por_consola, traer_consola_al_frente
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
-from constantes import RUTA_SAP_DESCARGAS
-
-#entrar a came seleccionada desde IW38
+from constantes import RUTA_SAP_DESCARGAS, MAUFNR
 
 def ingreso_a_came(session):
     session.findById("wnd[0]").maximize()
@@ -28,203 +26,70 @@ def ver_fotos_en_came(session, modo):
     elif modo == "pdf":
         abrir_pdf_came(session)
 
-def abrir_fotos_came(session):
-    
-    #Abre Visualizar imagenes
-    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
-    
-    # Espera a que aparezca el popup
-    if esperar_popup(session, timeout=3):
-        # presiona el botón Aceptar en el popup
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
-        return False
-    
-    return True
-
-def abrir_doc_list_came(session):
-    
-    # abre Lista de documentos
-    session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
-    
-    # Espera a que aparezca el popup
-    if esperar_popup(session, timeout=3):
-        # presiona el botón Aceptar en el popup
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
-        return False
-    
-    return True
-
-def abrir_pdf_came(session):
-
-    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
-    
-    # Espera a que aparezca la ventana con la grid
-    if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
-        grid = session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell")
-        
-        # Obtener el número total de filas en la grid
-        row_count = grid.RowCount
-        
-        # Iterar a través de todas las filas
-        for row_index in range(row_count):
-            try:
-                # Seleccionar la fila actual
-                grid.currentCellRow = row_index
-                grid.currentCellColumn = "NOMBRE"
-                
-                # Verificar si la celda tiene contenido
-                cell_value = grid.getCellValue(row_index, "NOMBRE")
-                
-                # Si la celda está vacía, terminar el bucle
-                if not cell_value or cell_value.strip() == "":
-                    break
-                
-                # Hacer doble clic en la celda con contenido
-                grid.doubleClickCurrentCell()
-                
-                # Pequeña pausa entre selecciones para estabilidad
-                time.sleep(0.5)
-                
-            except Exception as e:
-                # Si hay error al acceder a una fila, probablemente llegamos al final
-                print(f"Error al procesar fila {row_index}: {e}")
-                break
-        
-        # Cerrar las ventanas después de procesar todas las filas
-        session.findById("wnd[1]").close()
-        session.findById("wnd[0]/shellcont").close()
-
 def entrar_a_care(session):
-    campo = session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/subMAINORDER:SAPLCOIH:0152/ctxtCAUFVD-MAUFNR")
+    campo = session.findById(MAUFNR)
     campo.setFocus()
     campo.caretPosition = 7
     datos["Ubicacion Aviso"] = get_textoBreveCare(session)
     datos["Clase de actividad aviso"] =  get_claseActividad(session)
-    session.findById("wnd[0]").sendVKey(2)
+    session.findById("wnd[0]").sendVKey(2) #F2
 
 def ver_fotos_en_care(session):
-    fotos_encontradas_row0a = True
-    fotos_encontradas_row0b = True
-    fotos_encontradas_row1a = True
-    fotos_encontradas_row1b = True
+    docsAviso = docsOrden = imagenesOrden = imagenesAviso = False
     
     # Primera fila (row 0)
     session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
 
     session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(0).selected = True
-    session.findById("wnd[1]").sendVKey(0)
+    session.findById("wnd[1]").sendVKey(0) # enter
 
-    # Espera a que se procese la selección
-    if esperar_elemento(session, "wnd[0]/shellcont/shell", timeout=3):
-        session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
-
+    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
+    time.sleep(0.5)
     if session.Children.Count > 1:
-        # presiona el botón Aceptar en el popup
+        print("No hay imagenes en ORDEN DE MANTENIMIENTO")
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()        
+    else:
+        imagenesOrden = True
+        print("Imagenes encontradas en ORDEN DE MANTENIMIENTO")
+
+    session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
+    time.sleep(0.5)
+    if session.Children.Count > 1:
+        print("No hay docs en ORDEN DE MANTENIMIENTO")
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
-        fotos_encontradas_row0a = False
-        
-        # abre lista de documentos
-        session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
+    else:
+        docsOrden = True
+        print("Documentos encontrados en ORDEN DE MANTENIMIENTO")
 
-        if session.Children.Count > 1:
-            # presiona el botón Aceptar en el popup
-            session.findById("wnd[1]/tbar[0]/btn[0]").press()
-            fotos_encontradas_row0b = False
-
-    # Segunda fila (row 1)
+    # Segunda fila
     session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
 
     session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(1).selected = True
     session.findById("wnd[1]").sendVKey(0)
+    
     session.findById("wnd[0]/shellcont[1]/shell").pressButton("VIEW_IMAG")
-    
-    # Espera a que aparezca el popup
+    time.sleep(0.5)
     if session.Children.Count > 1:
-        # presiona el botón Aceptar en el popup
+        print("No hay imagenes en AVISO")
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
-        fotos_encontradas_row1a = False
+    else:
+        imagenesAviso = True
+        print("Imagenes encontradas en AVISO")
 
-        # abre Lista de documentos
-        session.findById("wnd[0]/shellcont[1]/shell").pressButton("DOC_LIST")
-        
-        # Espera inteligente a que aparezca el popup
-        if esperar_popup(session, timeout=3):
-            # presiona el botón Aceptar en el popup
-            session.findById("wnd[1]/tbar[0]/btn[0]").press()
-            fotos_encontradas_row1b = False
-
-    fotos_encontradas = fotos_encontradas_row0a or fotos_encontradas_row0b or fotos_encontradas_row1a or fotos_encontradas_row1b
+    session.findById("wnd[0]/shellcont[1]/shell").pressButton("DOC_LIST")
+    time.sleep(0.5)
+    if esperar_popup(session, timeout=3):
+        print("No hay docs en AVISO")
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+    else:
+        docsAviso = True
+        print("Documentos encontrados en AVISO")
     
+    fotosEncontradas = docsAviso or docsOrden or imagenesAviso or imagenesOrden 
+
     # Si no se encontraron fotos en ninguna de las dos filas, acceder directamente a documentos
-    if not fotos_encontradas:
-        print("No se encontraron fotos. Accediendo directamente a documentos...")
-        
-        # Seguir exactamente la secuencia del Script2.vbs
-        session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
-        
-        # Esperar a que aparezca la ventana GOS_TOOLBOX
-        if esperar_elemento(session, "wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL", timeout=3):
-            # Seleccionar la fila 1 y hacer foco en el campo específico como en Script2.vbs
-            #session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL/txtSWLOBJTDYN-DEF_ATTRIB[1,1]").setFocus()
-            #session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL/txtSWLOBJTDYN-DEF_ATTRIB[1,1]").caretPosition = 4
-            session.findById("wnd[1]").sendVKey(2)
-            
-            # Intentar diferentes ubicaciones para VIEW_DOC
-            try:
-                # Primero intentar como en Script2.vbs
-                session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
-            except:
-                try:
-                    # Si no funciona, intentar con shellcont[1] como en el resto de la función
-                    session.findById("wnd[0]/shellcont[1]/shell").pressButton("VIEW_DOC")
-                except:
-                    return
-        
-        # Procesar todos los documentos en la grid (adaptado de ver_fotos_en_came)
-        if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
-            grid = session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell")
-            
-            # Obtener el número total de filas en la grid
-            row_count = grid.RowCount
-            
-            # Iterar a través de todas las filas
-            for row_index in range(row_count):
-                try:
-                    # Seleccionar la fila actual
-                    grid.currentCellRow = row_index
-                    grid.currentCellColumn = "NOMBRE"
-                    
-                    # Verificar si la celda tiene contenido
-                    cell_value = grid.getCellValue(row_index, "NOMBRE")
-                    
-                    # Si la celda está vacía, terminar el bucle
-                    if not cell_value or cell_value.strip() == "":
-                        break
-                    
-                    # Hacer doble clic en la celda con contenido
-                    grid.doubleClickCurrentCell()
-                    
-                    # Pequeña pausa entre selecciones para estabilidad
-                    time.sleep(0.5)
-                    
-                except Exception as e:
-                    # Si hay error al acceder a una fila, probablemente llegamos al final
-                    print(f"Error al procesar fila {row_index}: {e}")
-                    break
-            
-            # Cerrar las ventanas después de procesar todas las filas
-            try:
-                session.findById("wnd[1]").close()
-            except:
-                pass
-            
-            try:
-                session.findById("wnd[0]/shellcont[1]").close()
-            except:
-                try:
-                    session.findById("wnd[0]/shellcont").close()
-                except:
-                    pass
+    if not fotosEncontradas:
+        print("No se encontraron fotos. Revisa los a documentos...")
 
 def entrar_a_aviso(session):
     # Cerrar ventanas adicionales que puedan estar abiertas
@@ -679,3 +544,70 @@ def _mostrar_tabla_datos(datos_dict):
 
     print(separator)
 
+    # FUNCIONES AUXILIARES
+
+def abrir_fotos_came(session):
+    
+    #Abre Visualizar imagenes
+    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
+    
+    # Espera a que aparezca el popup
+    if esperar_popup(session, timeout=3):
+        # presiona el botón Aceptar en el popup
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+        return False
+    
+    return True
+
+def abrir_doc_list_came(session):
+    
+    # abre Lista de documentos
+    session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
+    
+    # Espera a que aparezca el popup
+    if esperar_popup(session, timeout=3):
+        # presiona el botón Aceptar en el popup
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+        return False
+    
+    return True
+
+def abrir_pdf_came(session):
+
+    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
+    
+    # Espera a que aparezca la ventana con la grid
+    if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
+        grid = session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell")
+        
+        # Obtener el número total de filas en la grid
+        row_count = grid.RowCount
+        
+        # Iterar a través de todas las filas
+        for row_index in range(row_count):
+            try:
+                # Seleccionar la fila actual
+                grid.currentCellRow = row_index
+                grid.currentCellColumn = "NOMBRE"
+                
+                # Verificar si la celda tiene contenido
+                cell_value = grid.getCellValue(row_index, "NOMBRE")
+                
+                # Si la celda está vacía, terminar el bucle
+                if not cell_value or cell_value.strip() == "":
+                    break
+                
+                # Hacer doble clic en la celda con contenido
+                grid.doubleClickCurrentCell()
+                
+                # Pequeña pausa entre selecciones para estabilidad
+                time.sleep(0.5)
+                
+            except Exception as e:
+                # Si hay error al acceder a una fila, probablemente llegamos al final
+                print(f"Error al procesar fila {row_index}: {e}")
+                break
+        
+        # Cerrar las ventanas después de procesar todas las filas
+        session.findById("wnd[1]").close()
+        session.findById("wnd[0]/shellcont").close()
