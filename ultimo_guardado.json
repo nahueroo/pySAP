@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z03_R11_CERT _33_ACTA_1298",
+  "Texto Breve": "P6_2_Z03_R11_CERT _33_ACTA_1296",
   "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "QUINQUELA MARTIN BEN 1951-2000 Calzada",
-  "Ubicacion Aviso": "QUINQUELA MARTIN BEN 1996 bache asfalto",
+  "Ubicacion Tecnica": "ALVARADO 2002-2100 Acera Par",
+  "Ubicacion Aviso": "ALVARADO 2100",
   "Clase de actividad aviso": "G01",
-  "Tipo Aviso": "OF",
+  "Tipo Aviso": "RE",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "17.04.2026 15:45:30 UTC-3 Alan Javier Martinez (AMARTINEZ) Informado por inspeccion de obra",
-  "Datos CARE": "+-----------------------------------------+-----------+\n| TRABAJO                                 | ITEMIZADO |\n+-----------------------------------------+-----------+\n| QUINQUELA MARTIN BEN 1996 bache asfalto | 3         |\n+-----------------------------------------+-----------+\n| TOTAL GENERAL: 3.00                     |           |\n+-----------------------------------------+-----------+",
-  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 0,8      |\n+----------------------+----------+\n| Subtotal: 0.80       |          |\n+----------------------+----------+",
-  "timestamp": "2026-06-14 19:23:14"
+  "Aviso": "27.04.2026 15:37:11 UTC-3  CRMUSER (CRMUSER) Nota de alta de incidente 27.04.2026          15:37:11            DDALMAU Hundimiento de calzada",
+  "Datos CARE": "+---------------+-----------+\n| TRABAJO       | ITEMIZADO |\n+---------------+-----------+\n| ALVARADO 2100 | 16        |\n+---------------+-----------+\n| TOTAL GENERAL: 16.00 |           |\n+---------------+-----------+",
+  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 6,4      |\n|                      | 14,7     |\n+----------------------+----------+\n| Subtotal: 21.10      |          |\n+----------------------+----------+",
+  "timestamp": "2026-06-17 12:30:55"
 }

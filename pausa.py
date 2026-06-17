@@ -41,11 +41,9 @@ def pausa_por_consola():
 
 def pausa():
     teclaPresionada = pausa_por_consola()
-    if teclaPresionada == ENTER:
-        print("")
+    if teclaPresionada == CONTINUE:
         return ENTER
     elif teclaPresionada == CANCEL:
-        print("")
         return CANCEL
     else:
         print(f"Codigo de salida inesperado: {teclaPresionada}")

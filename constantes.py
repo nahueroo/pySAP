@@ -31,7 +31,7 @@ AVISO = "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_
 
 # Rutas SAP
 
-RUTA_SAP_DESCARGAS = r"C:\Users\nahue\OneDrive\Documentos\SAP\SAP GUI"
+RUTA_SAP_DESCARGAS = r"C:\Users\nahue\Documents\SAP\SAP GUI"
 
 RUTAS_SAP = {
 

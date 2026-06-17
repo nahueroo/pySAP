@@ -12,7 +12,6 @@ def _get_sap_field(session, ruta, nombre_campo="", caret_position=None):
         return elemento.text
     
     except Exception as e:
-        print(f"Error al obtener {nombre_campo}: {e}")
         return None
     
 def get_textoBreve(session):
@@ -181,23 +180,17 @@ def get_texto_aviso(session):
         # Obtener información básica de la tabla
         try:
             filas_visibles = tabla.visibleRowCount
-            print(f"try filas visibles: {filas_visibles}")
             total_filas = tabla.rowCount
-            print(f"try total filas: {total_filas}")
         except:
             filas_visibles = 4
-            print(f"except filas visibles: {filas_visibles}")
             total_filas = 20
-            print(f"except total filas: {total_filas}")
         
         # Resetear scroll al inicio
         try:
             if hasattr(tabla, 'verticalScrollbar'):
                 tabla.verticalScrollbar.position = 0
-                print(f"try tabla: {tabla}")
             if hasattr(tabla, 'firstVisibleRow'):
                 tabla.firstVisibleRow = 0
-                print(f"except table: {tabla}")
         except:
             pass
         
