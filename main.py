@@ -2,6 +2,13 @@ from scripts import principal
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 import os
 
+def mostrar_menu_navegador():
+
+    print("\n---Elegir navegador---\b\b")
+    print("1: Firefox\n")
+    print("2: Chrome\n")
+    print("3: Edge\n")
+
 def mostrar_menu():
 
     print("\n---MENU ---\b\b")
@@ -14,17 +21,27 @@ def main():
     # Crear carpeta actas al inicio
     os.makedirs("actas", exist_ok=True)
 
+    mostrar_menu_navegador()
+    nav = input("Navegador?")
+
     while True:
         os.system("cls")
         traer_consola_al_frente()  # Traer consola al frente cada vez que se muestra el menú
+        
         mostrar_menu()
         opcion = input("Opcion?\n")
 
+        if nav == 1:
+            nav = "firefox"
+        elif nav == 2:
+            nav = "chrome"
+        else:
+            nav = "edge"
 
         if opcion == "1":
-            principal("fotos")
+            principal("fotos",nav)
         elif opcion == "2":
-            principal("pdf")
+            principal("pdf",nav)
         elif opcion == "3":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")

@@ -1,10 +1,10 @@
-from cerrarpestanias import cerrar_pestanas_firefox
+from cerrarpestanias import cerrar_pestanas_firefox,cerrar_pestanas_chrome,cerrar_pestanas_edge
 from utils import *
 from pausa import pausa
 from sap_connection import obtener_session_sap
 from constantes import CANCEL
 
-def principal(tipo):
+def principal(tipo,nav):
 
     if tipo not in("fotos","pdf"):
         print("Tipo invalido, usa 'fotos' o 'pdf'.")
@@ -42,7 +42,17 @@ def principal(tipo):
     exit_code = pausa()
     if exit_code == CANCEL:  # Usuario presionó ESC
         salir(session)
-        cerrar_pestanas_firefox()
+        if nav == "firefox":
+            cerrar_pestanas_firefox()
+        elif nav == "chrome":
+            cerrar_pestanas_chrome()
+        else:
+            cerrar_pestanas_edge()
     else:  # Usuario presionó ENTER (exit_code == 0)
         cgi(session)
-        cerrar_pestanas_firefox()
+        if nav == "firefox":
+            cerrar_pestanas_firefox()
+        elif nav == "chrome":
+            cerrar_pestanas_chrome()
+        else:
+            cerrar_pestanas_edge()

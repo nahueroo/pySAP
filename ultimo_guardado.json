@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_36_ACTA_2857",
+  "Texto Breve": "P6_2_Z10_R18_CERT_23_ACTA_1736",
   "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "SANTA FE AV. 2001-2099 Acera Impar",
-  "Ubicacion Aviso": "SANTA FE AV. 2099",
+  "Ubicacion Tecnica": "ARAUJO 401-500 Calzada",
+  "Ubicacion Aviso": "ARAUJO 472/79 dos serv asfalto",
   "Clase de actividad aviso": "G01",
-  "Tipo Aviso": "SU",
+  "Tipo Aviso": "OF",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "01.11.2024 05:47:16 UTC-3  CRMUSER (CRMUSER) Nota de alta de incidente 01.11.2024          05:47:16            SUACI_CRM Arreglar tapa grande suelta en asfalto , la arreglaron pero no quedo bien , gracias",
-  "Datos CARE": "+-------------------+-----------+\n| TRABAJO           | ITEMIZADO |\n+-------------------+-----------+\n| SANTA FE AV. 2099 | 0         |\n| SANTA FE AV. 2099 | 0         |\n+-------------------+-----------+\n| TOTAL GENERAL: 0.00 |           |\n+-------------------+-----------+",
-  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 1.4.3_Demolicion de Calzada              | 2,8      |\n+------------------------------------------+----------+\n| Subtotal: 2.80                           |          |\n+------------------------------------------+----------+\n| 10.2_Bacheo profundo                     | 1,3      |\n+------------------------------------------+----------+\n| Subtotal: 1.30                           |          |\n+------------------------------------------+----------+\n| 2.1_Excavación de todo tipo no clasifica | 0,3      |\n+------------------------------------------+----------+\n| Subtotal: 0.30                           |          |\n+------------------------------------------+----------+\n| 7.1_Recalce y Nivelación de tapas en H°  | 1        |\n+------------------------------------------+----------+\n| Subtotal: 1.00                           |          |\n+------------------------------------------+----------+",
-  "timestamp": "2026-09-21 11:54:10"
+  "Aviso": "14.07.2025 15:08:52 UTC-3 Alan Javier Martinez (AMARTINEZ) Informado por inspeccion de obra",
+  "Datos CARE": "+-------------------------+-----------+\n| TRABAJO                 | ITEMIZADO |\n+-------------------------+-----------+\n| ARAUJO 472 serv asfalto | 2         |\n| ARAUJO 479 serv asfalto | 2         |\n+-------------------------+-----------+\n| TOTAL GENERAL: 4.00     |           |\n+-------------------------+-----------+",
+  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 6.2_Cierre de aperturas de Servicios Púb | 1,6      |\n|                                          | 3,2      |\n+------------------------------------------+----------+\n| Subtotal: 4.80                           |          |\n+------------------------------------------+----------+",
+  "timestamp": "2026-10-01 14:26:40"
 }

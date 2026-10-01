@@ -9,12 +9,12 @@ ENTER = b'\r'
 ESCAPE = b'\x1b'
 
 # Time Sleep
-FIREFOX_ACTIVATE_DELAY = 0.3
-FIREFOX_TAB_SWITCH_DELAY = 0.3
-FIREFOX_CLOSE_DELAY = 0.5
+ACTIVATE_DELAY = 0.3
+TAB_SWITCH_DELAY = 0.3
+CLOSE_DELAY = 0.5
 
 # Nombres Pestañas
-PESTANASFIREFOX = ["image.html","data.pdf", "Microsoft Word"]
+PESTANAS = ["image.html","data.pdf", "Microsoft Word"]
 
 # Campos CARE y CAME
 
