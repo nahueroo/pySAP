@@ -1,3 +1,5 @@
+import os
+
 # Codigos de retorno
 
 CONTINUE = 0
@@ -31,7 +33,13 @@ AVISO = "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_
 
 # Rutas SAP
 
-RUTA_SAP_DESCARGAS = r"C:\Users\nahue\Documents\SAP\SAP GUI"
+# RUTA_SAP_DESCARGAS = r"C:\Users\nahue\Documents\SAP\SAP GUI"
+RUTA_SAP_DESCARGAS = os.path.join(
+    os.path.expanduser("~"),
+    "Documents",
+    "SAP",
+    "SAP Gui"
+)
 
 RUTAS_SAP = {
 

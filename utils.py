@@ -298,7 +298,6 @@ def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
     """
     Mueve archivos de la carpeta SAP GUI a la carpeta destino especificada.
     Los renombra agregando un sufijo antes de la extensión.
-    Ruta origen: C:\\Users\\nahue\\Documents\\SAP\\SAP GUI
 
     Args:
         carpeta_destino: Ruta donde mover los archivos

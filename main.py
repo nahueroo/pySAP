@@ -1,28 +1,19 @@
-from scripts import principal
+from scripts import principal,solofotos
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
-import os
-
-def mostrar_menu_navegador():
-
-    print("\n---Elegir navegador---\b\b")
-    print("1: Firefox\n")
-    print("2: Chrome\n")
-    print("3: Edge\n")
+import os, pyautogui
 
 def mostrar_menu():
 
     print("\n---MENU ---\b\b")
     print("1. Fotos/PDF")
     print("2. Directo PDF")
-    print("3. Mostrar ultimo guardado")
-    print("4. Salir")
+    print("3. Solo bajar fotos")
+    print("4. Mostrar ultimo guardado")
+    print("5. Salir")
 
 def main():
     # Crear carpeta actas al inicio
     os.makedirs("actas", exist_ok=True)
-
-    mostrar_menu_navegador()
-    nav = input("Navegador?")
 
     while True:
         os.system("cls")
@@ -31,21 +22,17 @@ def main():
         mostrar_menu()
         opcion = input("Opcion?\n")
 
-        if nav == 1:
-            nav = "firefox"
-        elif nav == 2:
-            nav = "chrome"
-        else:
-            nav = "edge"
-
         if opcion == "1":
-            principal("fotos",nav)
+            principal("fotos")
         elif opcion == "2":
-            principal("pdf",nav)
+            principal("pdf")
         elif opcion == "3":
+            for _ in range(3):
+                solofotos("fotos")
+        elif opcion == "4":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
-        elif opcion == "4":
+        elif opcion == "5":
             print("Saliendo...")
             break
         else:

@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_23_ACTA_1736",
+  "Texto Breve": "P6_2_Z10_R18_CERT_37_ACTA_2910",
   "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "ARAUJO 401-500 Calzada",
-  "Ubicacion Aviso": "ARAUJO 472/79 dos serv asfalto",
+  "Ubicacion Tecnica": "NAZCA 5001-5100 Calzada",
+  "Ubicacion Aviso": "NAZCA 5040 bache asfalto",
   "Clase de actividad aviso": "G01",
   "Tipo Aviso": "OF",
   "Autor Aviso": null,
   "Fecha Aviso": null,
   "Servicio": null,
-  "Aviso": "14.07.2025 15:08:52 UTC-3 Alan Javier Martinez (AMARTINEZ) Informado por inspeccion de obra",
-  "Datos CARE": "+-------------------------+-----------+\n| TRABAJO                 | ITEMIZADO |\n+-------------------------+-----------+\n| ARAUJO 472 serv asfalto | 2         |\n| ARAUJO 479 serv asfalto | 2         |\n+-------------------------+-----------+\n| TOTAL GENERAL: 4.00     |           |\n+-------------------------+-----------+",
-  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 6.2_Cierre de aperturas de Servicios Púb | 1,6      |\n|                                          | 3,2      |\n+------------------------------------------+----------+\n| Subtotal: 4.80                           |          |\n+------------------------------------------+----------+",
-  "timestamp": "2026-10-01 14:26:40"
+  "Aviso": "03.08.2026 14:38:33 UTC-3 Alan Javier Martinez (AMARTINEZ) Informado por inspeccion de obra",
+  "Datos CARE": "+--------------------------+-----------+\n| TRABAJO                  | ITEMIZADO |\n+--------------------------+-----------+\n| NAZCA 5040 bache asfalto | 5         |\n+--------------------------+-----------+\n| TOTAL GENERAL: 5.00      |           |\n+--------------------------+-----------+",
+  "Datos CAME": "+----------------------+----------+\n| TRABAJO              | CANTIDAD |\n+----------------------+----------+\n| 10.2_Bacheo profundo | 5,1      |\n|                      | 0,7      |\n+----------------------+----------+\n| Subtotal: 5.80       |          |\n+----------------------+----------+",
+  "timestamp": "2026-10-02 15:21:56"
 }
