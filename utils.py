@@ -20,8 +20,9 @@ def ver_fotos_en_came(session, modo):
     session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
 
     if modo == "fotos":
-        abrir_fotos_came(session)
-        if not abrir_fotos_came:
+        hayfotos = abrir_fotos_came(session)
+        if not hayfotos:
+            time.sleep(0.3)
             abrir_pdf_came(session)
     elif modo == "pdf":
         abrir_pdf_came(session)
@@ -548,6 +549,12 @@ def abrir_doc_list_came(session):
 def abrir_pdf_came(session):
 
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
+
+    # Espera a que aparezca el popup
+    if esperar_popup(session, timeout=3):
+        # presiona el botón Aceptar en el popup
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+        time.sleep(0.2)
     
     # Espera a que aparezca la ventana con la grid
     if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):

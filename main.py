@@ -5,11 +5,10 @@ import os, pyautogui
 def mostrar_menu():
 
     print("\n---MENU ---\b\b")
-    print("1. Fotos/PDF")
-    print("2. Directo PDF")
-    print("3. Solo bajar fotos")
-    print("4. Mostrar ultimo guardado")
-    print("5. Salir")
+    print("1. Corregir un acta")
+    print("2. Mostrar ultima guardada")
+    print("3. Bajar fotos")
+    print("4. Salir")
 
 def main():
     # Crear carpeta actas al inicio
@@ -25,14 +24,13 @@ def main():
         if opcion == "1":
             principal("fotos")
         elif opcion == "2":
-            principal("pdf")
-        elif opcion == "3":
-            for _ in range(3):
-                solofotos("fotos")
-        elif opcion == "4":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
-        elif opcion == "5":
+        elif opcion == "3":
+            cantidad = int(input("Ingresar cantidad de actas: "))
+            for _ in range(cantidad):
+                solofotos("fotos")
+        elif opcion == "4":
             print("Saliendo...")
             break
         else:
