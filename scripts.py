@@ -6,11 +6,7 @@ from constantes import CANCEL
 
 import win32gui,win32con
 
-def principal(tipo):
-
-    if tipo not in("fotos","pdf"):
-        print("Tipo invalido, usa 'fotos' o 'pdf'.")
-        return
+def principal():
     
     session = obtener_session_sap()
     if session is None:
@@ -23,12 +19,8 @@ def principal(tipo):
         print("No se pudo crear la carpeta, script cancelado.")
         return
 
-    if tipo == "fotos":
-        ver_fotos_en_came(session,"fotos")
-        mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
-    elif tipo == "pdf":
-        ver_fotos_en_came(session,"pdf")
-        mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
+    ver_fotos_en_came(session)
+    mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
 
     entrar_a_care(session)
     ver_fotos_en_care(session)
@@ -70,12 +62,8 @@ def solofotos(tipo):
         print("No se pudo crear la carpeta, script cancelado.")
         return
 
-    if tipo == "fotos":
-        ver_fotos_en_came(session,"fotos")
-        mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
-    elif tipo == "pdf":
-        ver_fotos_en_came(session,"pdf")
-        mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
+    ver_fotos_en_came(session)
+    mover_y_renombrar_archivos_sap(carpeta_acta, "CAME")
 
     entrar_a_care(session)
     ver_fotos_en_care(session)

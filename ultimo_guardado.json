@@ -1,15 +1,15 @@
 {
-  "Texto Breve": "P6_2_Z10_R18_CERT_37_ACTA_2923",
-  "Clase de actividad": "G01",
-  "Ubicacion Tecnica": "PICO 3201-3300 Calzada",
-  "Ubicacion Aviso": "PICO 3299 bache adoquin",
-  "Clase de actividad aviso": "G01",
-  "Tipo Aviso": "OF",
-  "Autor Aviso": null,
-  "Fecha Aviso": null,
-  "Servicio": null,
-  "Aviso": "11.09.2026 12:26:31 UTC-3 Alan Javier Martinez (AMARTINEZ) Informado por inspeccion de obra",
-  "Datos CARE": "+-------------------------+-----------+\n| TRABAJO                 | ITEMIZADO |\n+-------------------------+-----------+\n| PICO 3299 bache adoquin | 3         |\n+-------------------------+-----------+\n| TOTAL GENERAL: 3.00     |           |\n+-------------------------+-----------+",
-  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 2.1_Excavación de todo tipo no clasifica | 0,8      |\n+------------------------------------------+----------+\n| Subtotal: 0.80                           |          |\n+------------------------------------------+----------+\n| 3.2_De R.A.P. (provisto por el GCBA) de  | 0,8      |\n+------------------------------------------+----------+\n| Subtotal: 0.80                           |          |\n+------------------------------------------+----------+\n| 4.1.1_De granito o granitullo. Utilizaci | 7,5      |\n+------------------------------------------+----------+\n| Subtotal: 7.50                           |          |\n+------------------------------------------+----------+",
-  "timestamp": "2026-10-02 16:23:11"
+  "Texto Breve": "P6_2_Z12_R20_CERT_27_ACTA_3922",
+  "Clase de actividad": "G02",
+  "Ubicacion Tecnica": "SALGUERO, JERONIMO 3143-3349 Acera Impar",
+  "Ubicacion Aviso": "SALGUERO, JERONIMO      3147",
+  "Clase de actividad aviso": "G02",
+  "Tipo Aviso": "AP",
+  "Autor Aviso": "FISCZONA14",
+  "Fecha Aviso": "04.12.2025",
+  "Servicio": "CPS COMUNICACIONES S.A.-POS: 0000000060",
+  "Aviso": "Sin texto disponible",
+  "Datos CARE": "+------------------------------+-----------+\n| TRABAJO                      | ITEMIZADO |\n+------------------------------+-----------+\n| SALGUERO, JERONIMO      3147 | 3         |\n| SALGUERO, JERONIMO      3147 | 3         |\n+------------------------------+-----------+\n| TOTAL GENERAL: 6.00          |           |\n+------------------------------+-----------+",
+  "Datos CAME": "+------------------------------------------+----------+\n| TRABAJO                                  | CANTIDAD |\n+------------------------------------------+----------+\n| 6.3_Cierre de aperturas de Servicios Púb | 4,4      |\n|                                          | 4,9      |\n+------------------------------------------+----------+\n| Subtotal: 9.30                           |          |\n+------------------------------------------+----------+",
+  "timestamp": "2026-10-03 12:30:36"
 }

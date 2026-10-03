@@ -22,7 +22,7 @@ def main():
         opcion = input("Opcion?\n")
 
         if opcion == "1":
-            principal("fotos")
+            principal()
         elif opcion == "2":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
