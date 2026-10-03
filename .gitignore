@@ -5,3 +5,4 @@ __pycache__/
 build/
 *.spec
 dist/
+ultimo_guardado.json
