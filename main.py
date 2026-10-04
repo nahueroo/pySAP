@@ -1,6 +1,7 @@
-from scripts import principal,solofotos
+from scripts import principal
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
-import os, pyautogui
+from pausa import limpiar_consola
+import os
 
 def mostrar_menu():
 
@@ -15,21 +16,21 @@ def main():
     os.makedirs("actas", exist_ok=True)
 
     while True:
-        os.system("cls")
+        limpiar_consola()
         traer_consola_al_frente()  # Traer consola al frente cada vez que se muestra el menú
         
         mostrar_menu()
         opcion = input("Opcion?\n")
 
         if opcion == "1":
-            principal()
+            principal("corregir")
         elif opcion == "2":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
         elif opcion == "3":
             cantidad = int(input("Ingresar cantidad de actas: "))
             for _ in range(cantidad):
-                solofotos("fotos")
+                principal("descarga")
         elif opcion == "4":
             print("Saliendo...")
             break

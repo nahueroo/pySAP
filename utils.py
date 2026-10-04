@@ -16,13 +16,13 @@ def ingreso_a_came(session):
     datos["Clase de actividad"] = get_claseActividad(session)
     datos["Ubicacion Tecnica"] = get_UT(session)
 
-def ver_fotos_en_came(session):
+def ver_fotos_en_came(session,carpeta_destino,sufijo):
     session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
 
-    hayfotos = abrir_fotos_came(session)
+    hayfotos = abrir_fotos_came(session,carpeta_destino,sufijo)
     if not hayfotos:
         time.sleep(0.3)
-        abrir_pdf_came(session)
+        abrir_pdf_came(session,carpeta_destino,sufijo)
 
 def entrar_a_care(session):
     campo = session.findById(MAUFNR)
@@ -32,7 +32,7 @@ def entrar_a_care(session):
     datos["Clase de actividad aviso"] =  get_claseActividad(session)
     session.findById("wnd[0]").sendVKey(2) #F2
 
-def ver_fotos_en_care(session):
+def ver_fotos_en_care(session,carpeta_destino,sufijo):
     docsAviso = docsOrden = imagenesOrden = imagenesAviso = False
     
     # Primera fila (row 0)
@@ -48,6 +48,7 @@ def ver_fotos_en_care(session):
         session.findById("wnd[1]/tbar[0]/btn[0]").press()        
     else:
         imagenesOrden = True
+        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
         print("Imagenes encontradas en ORDEN DE MANTENIMIENTO")
 
     session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
@@ -57,6 +58,7 @@ def ver_fotos_en_care(session):
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
     else:
         docsOrden = True
+        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
         print("Documentos encontrados en ORDEN DE MANTENIMIENTO")
 
     # Segunda fila
@@ -72,6 +74,7 @@ def ver_fotos_en_care(session):
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
     else:
         imagenesAviso = True
+        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
         print("Imagenes encontradas en AVISO")
 
     session.findById("wnd[0]/shellcont[1]/shell").pressButton("DOC_LIST")
@@ -81,6 +84,7 @@ def ver_fotos_en_care(session):
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
     else:
         docsAviso = True
+        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
         print("Documentos encontrados en AVISO")
     
     fotosEncontradas = docsAviso or docsOrden or imagenesAviso or imagenesOrden 
@@ -294,12 +298,12 @@ def crear_carpeta_acta(texto_breve):
 
 def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
     """
-    Mueve archivos de la carpeta SAP GUI a la carpeta destino especificada.
-    Los renombra agregando un sufijo antes de la extensión.
+    Mueve las fotos a la carpeta creada.
+    Los renombra agregando CAME o CARE de acuerdo a de donde son.
 
     Args:
         carpeta_destino: Ruta donde mover los archivos
-        sufijo: Sufijo a agregar al nombre (ej: "CAME", "CARE")
+        sufijo: Sufijo a agregar al nombre ("CAME", "CARE")
     """
     try:
         ruta_sap = RUTA_SAP_DESCARGAS
@@ -328,6 +332,13 @@ def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
                 # Crear nuevo nombre con sufijo
                 nuevo_nombre = f"{nombre_base}_{sufijo}{extension}"
                 ruta_destino = os.path.join(carpeta_destino, nuevo_nombre)
+
+                contador_nombre = 1
+                
+                while os.path.exists(ruta_destino):
+                    nuevo_nombre = f"{nombre_base}_{sufijo} ({contador_nombre}){extension}"
+                    ruta_destino = os.path.join(carpeta_destino, nuevo_nombre)
+                    contador_nombre += 1
 
                 try:
                     shutil.move(ruta_origen, ruta_destino)
@@ -517,7 +528,7 @@ def _mostrar_tabla_datos(datos_dict):
 
     # FUNCIONES AUXILIARES
 
-def abrir_fotos_came(session):
+def abrir_fotos_came(session,carpeta_destino, sufijo):
     
     #Abre Visualizar imagenes
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
@@ -528,9 +539,10 @@ def abrir_fotos_came(session):
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
         return False
     
+    mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
     return True
 
-def abrir_doc_list_came(session):
+def abrir_doc_list_came(session,carpeta_destino, sufijo):
     
     # abre Lista de documentos
     session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
@@ -541,9 +553,10 @@ def abrir_doc_list_came(session):
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
         return False
     
+    mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
     return True
 
-def abrir_pdf_came(session):
+def abrir_pdf_came(session,carpeta_destino, sufijo):
 
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
     
@@ -573,6 +586,7 @@ def abrir_pdf_came(session):
                 
                 # Pequeña pausa entre selecciones para estabilidad
                 time.sleep(0.5)
+                mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
                 
             except Exception as e:
                 # Si hay error al acceder a una fila, probablemente llegamos al final

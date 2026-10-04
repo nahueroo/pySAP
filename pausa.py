@@ -1,7 +1,11 @@
 import msvcrt
 import ctypes
 import time
+import subprocess,os
 from constantes import CONTINUE, CANCEL, ENTER, ESCAPE
+
+def limpiar_consola():
+    subprocess.run("cls" if os.name == "nt" else "clear", shell=True)
 
 def traer_consola_al_frente():
 
