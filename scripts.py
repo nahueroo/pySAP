@@ -8,6 +8,7 @@ import win32gui
 def principal(modo):
     
     session = obtener_session_sap()
+    print(session)
     if session is None:
         return
 
@@ -41,6 +42,7 @@ def principal(modo):
             cgi(session)
     else:
         cerrar_pestanas()
+        time.sleep(0.3)
         salir(session)
 
     win32gui.SetForegroundWindow(hwnd)

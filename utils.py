@@ -20,17 +20,22 @@ def ver_fotos_en_came(session,carpeta_destino,sufijo):
     session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
 
     hayfotos = abrir_fotos_came(session,carpeta_destino,sufijo)
+    print("se ejecuto 'hay fotos'")
+    print("hayfotos: " + str(hayfotos))
     if not hayfotos:
         time.sleep(0.3)
         abrir_pdf_came(session,carpeta_destino,sufijo)
+        print("se ejecuto abrir pdf")
 
 def entrar_a_care(session):
+    print("Supuestamente ingresado a CARE")
     campo = session.findById(MAUFNR)
     campo.setFocus()
     campo.caretPosition = 7
     datos["Ubicacion Aviso"] = get_textoBreveCare(session)
     datos["Clase de actividad aviso"] =  get_claseActividad(session)
     session.findById("wnd[0]").sendVKey(2) #F2
+    print("Se ejecuto F2")
 
 def ver_fotos_en_care(session,carpeta_destino,sufijo):
     docsAviso = docsOrden = imagenesOrden = imagenesAviso = False
@@ -528,7 +533,7 @@ def _mostrar_tabla_datos(datos_dict):
 
     # FUNCIONES AUXILIARES
 
-def abrir_fotos_came(session,carpeta_destino, sufijo):
+def abrir_fotos_came(session,carpeta_destino,sufijo):
     
     #Abre Visualizar imagenes
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
@@ -559,6 +564,11 @@ def abrir_doc_list_came(session,carpeta_destino, sufijo):
 def abrir_pdf_came(session,carpeta_destino, sufijo):
 
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
+
+    # Espera a que aparezca el popup
+    if esperar_popup(session, timeout=3):
+        # presiona el botón Aceptar en el popup
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
     
     # Espera a que aparezca la ventana con la grid
     if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
