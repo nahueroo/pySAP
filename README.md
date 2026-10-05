@@ -20,6 +20,6 @@ python main.py
 
 ## Importante!
 
-- **SAP GUI debe estar abierto** con una sesión activa antes de ejecutar el script, en iw38/39 y con el cursor en la celda "Texto Breve"
+- **SAP debe estar abierto** con una sesión activa antes de ejecutar el script, en iw38/39 y con el cursor en la came correspondiente en la celda del "Texto Breve" de la misma.
 - El script crea automáticamente la carpeta `actas/` en el directorio actual
 - Navegadores soportados: firefox,chrome,edge.
