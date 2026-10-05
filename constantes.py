@@ -11,9 +11,8 @@ ENTER = b'\r'
 ESCAPE = b'\x1b'
 
 # Time Sleep
-ACTIVATE_DELAY = 0.3
-TAB_SWITCH_DELAY = 0.3
-CLOSE_DELAY = 0.5
+ESPERAR = 0.3
+ESPERARLARGO = 0.6
 
 # Nombres Pestañas
 PESTANAS = ["image.html","data.pdf", "Microsoft Word"]

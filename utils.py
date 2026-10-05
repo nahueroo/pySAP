@@ -1,5 +1,6 @@
 import time
 import pyautogui
+import win32gui
 import json
 import os
 import shutil
@@ -7,10 +8,17 @@ import csv
 from pausa import pausa_por_consola, traer_consola_al_frente
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
-from constantes import RUTA_SAP_DESCARGAS, MAUFNR, AVISO
+from constantes import RUTA_SAP_DESCARGAS, MAUFNR, AVISO,ESPERAR,ESPERARLARGO
+
+def obtener_acta_actual(session)->str:
+    grid = session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell")
+    fila = grid.CurrentCellRow
+    columna = grid.CurrentCellColumn
+    return grid.GetCellValue(fila,columna)
 
 def ingreso_a_came(session):
     session.findById("wnd[0]").maximize()
+
     session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell").doubleClickCurrentCell()
     datos["Texto Breve"] = get_textoBreve(session)
     datos["Clase de actividad"] = get_claseActividad(session)
@@ -20,15 +28,16 @@ def ver_fotos_en_came(session,carpeta_destino,sufijo):
     session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
 
     hayfotos = abrir_fotos_came(session,carpeta_destino,sufijo)
-    print("se ejecuto 'hay fotos'")
-    print("hayfotos: " + str(hayfotos))
     if not hayfotos:
-        time.sleep(0.3)
+        time.sleep(ESPERAR)
         abrir_pdf_came(session,carpeta_destino,sufijo)
         print("se ejecuto abrir pdf")
 
 def entrar_a_care(session):
-    print("Supuestamente ingresado a CARE")
+    campo = session.findById(MAUFNR)
+    campo.setFocus()
+    campo.caretPosition = 7
+    time.sleep(ESPERAR)
     campo = session.findById(MAUFNR)
     campo.setFocus()
     campo.caretPosition = 7
@@ -47,7 +56,7 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo):
     session.findById("wnd[1]").sendVKey(0) # enter
 
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
-    time.sleep(0.5)
+    time.sleep(ESPERARLARGO)
     if session.Children.Count > 1:
         print("No hay imagenes en ORDEN DE MANTENIMIENTO")
         session.findById("wnd[1]/tbar[0]/btn[0]").press()        
@@ -57,7 +66,7 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo):
         print("Imagenes encontradas en ORDEN DE MANTENIMIENTO")
 
     session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
-    time.sleep(0.5)
+    time.sleep(ESPERARLARGO)
     if session.Children.Count > 1:
         print("No hay docs en ORDEN DE MANTENIMIENTO")
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
@@ -73,7 +82,7 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo):
     session.findById("wnd[1]").sendVKey(0)
     
     session.findById("wnd[0]/shellcont[1]/shell").pressButton("VIEW_IMAG")
-    time.sleep(0.5)
+    time.sleep(ESPERARLARGO)
     if session.Children.Count > 1:
         print("No hay imagenes en AVISO")
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
@@ -83,7 +92,7 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo):
         print("Imagenes encontradas en AVISO")
 
     session.findById("wnd[0]/shellcont[1]/shell").pressButton("DOC_LIST")
-    time.sleep(0.5)
+    time.sleep(ESPERARLARGO)
     if esperar_popup(session, timeout=3):
         print("No hay docs en AVISO")
         session.findById("wnd[1]/tbar[0]/btn[0]").press()
@@ -224,7 +233,7 @@ def salir(session):
     """Simula presionar F3 y luego ENTER para salir"""
     # Usar SAP GUI directamente en lugar de pyautogui
     session.findById("wnd[0]").sendVKey(15)  # F3 en SAP
-    time.sleep(0.5)
+    time.sleep(ESPERARLARGO)
     session.findById("wnd[0]").sendVKey(0)   # ENTER en SAP
 
 def guardar_datos_ultimo():
@@ -566,9 +575,15 @@ def abrir_pdf_came(session,carpeta_destino, sufijo):
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
 
     # Espera a que aparezca el popup
-    if esperar_popup(session, timeout=3):
+    popup = esperar_popup(session, timeout=3)
+    if popup:
         # presiona el botón Aceptar en el popup
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+        try:
+            boton = session.findById("wnd[1]/tbar[0]/btn[0]")
+            boton.press()
+        except Exception:
+            print("No apareció el popup o no existe el botón Aceptar.")
+    
     
     # Espera a que aparezca la ventana con la grid
     if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
@@ -595,7 +610,7 @@ def abrir_pdf_came(session,carpeta_destino, sufijo):
                 grid.doubleClickCurrentCell()
                 
                 # Pequeña pausa entre selecciones para estabilidad
-                time.sleep(0.5)
+                time.sleep(ESPERARLARGO)
                 mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
                 
             except Exception as e:

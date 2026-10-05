@@ -2,16 +2,17 @@ from cerrarpestanias import cerrar_pestanas
 from utils import *
 from pausa import pausa
 from sap_connection import obtener_session_sap
-from constantes import CANCEL
+from constantes import CANCEL,ESPERAR,ESPERARLARGO
 import win32gui
 
-def principal(modo):
+def principal(modo)->str:
     
     session = obtener_session_sap()
-    print(session)
     if session is None:
         return
 
+    actaActual = obtener_acta_actual(session)
+    print(f"actaActual primera: {actaActual}")
     hwnd = session.findById("wnd[0]").Handle
 
     ingreso_a_came(session)
@@ -23,29 +24,46 @@ def principal(modo):
         return
 
     ver_fotos_en_came(session,carpeta_acta, "CAME")
-    entrar_a_care(session)
-    ver_fotos_en_care(session,carpeta_acta, "CARE")
+    if modo == "descarga":
+    
+        entrar_a_care(session)
+        ver_fotos_en_care(session,carpeta_acta, "CARE")
 
-    entrar_a_aviso(session)
-    aceptar_g02(session)
-    aceptar_itemizado(session)
-    mostrar_datos(carpeta_acta)
+        entrar_a_aviso(session)
+        aceptar_g02(session)
+        aceptar_itemizado(session)
+        mostrar_datos(carpeta_acta)
 
-    if modo == "corregir":
-        # El final del proceso lo define el usuario con ESC o ENTER
-        exit_code = pausa()
-        if exit_code == CANCEL:  # ESC
+        if modo == "corregir":
+            # El final del proceso lo define el usuario con ESC o ENTER
+            exit_code = pausa()
+            if exit_code == CANCEL:  # ESC
+                cerrar_pestanas()
+                salir(session)
+            else:  # ENTER
+                cerrar_pestanas()
+                cgi(session)
+        else:
             cerrar_pestanas()
+            time.sleep(ESPERAR)
             salir(session)
-        else:  # ENTER
-            cerrar_pestanas()
-            cgi(session)
-    else:
-        cerrar_pestanas()
-        time.sleep(0.3)
-        salir(session)
 
     win32gui.SetForegroundWindow(hwnd)
 
-    time.sleep(0.3)
-    pyautogui.press('down')      
+    time.sleep(ESPERAR)
+    pyautogui.press('down')
+    actaNueva = obtener_acta_actual(session)
+
+    print(f"actaActual: {actaActual}")
+    print(f"actaNueva: {actaNueva}")
+
+    cont = 0
+    while actaActual == actaNueva and cont < 25:
+        pyautogui.press('down')
+        cont+=1
+        print(f"se envio la tecla [DOWN]{cont} veces")
+        win32gui.SetForegroundWindow(hwnd)
+        time.sleep(ESPERARLARGO)
+
+    time.sleep(ESPERARLARGO)
+    return actaActual

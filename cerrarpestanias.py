@@ -1,7 +1,7 @@
 import time
 import pyautogui
 import pygetwindow as gw
-from constantes import PESTANAS, ACTIVATE_DELAY, CLOSE_DELAY, TAB_SWITCH_DELAY
+from constantes import PESTANAS, ESPERAR,ESPERARLARGO
 
 def cerrar_pestanas():
     
@@ -29,7 +29,7 @@ def cerrar_pestanas():
         # Activar la ventana
         try:
             ventana.activate()
-            time.sleep(ACTIVATE_DELAY)
+            time.sleep(ESPERAR)
         except Exception as e:
             print("No se pudo activar la ventana")
             break
@@ -38,11 +38,11 @@ def cerrar_pestanas():
         
         if title == "mozilla firefox" or title == "microsoft edge" or title == "google chrome" or any(x in title for x in PESTANAS):
             pyautogui.hotkey("ctrl","w")
-            time.sleep(CLOSE_DELAY)
+            time.sleep(ESPERARLARGO)
             count += 1
         else:
             pyautogui.hotkey("ctrl","tab")
-            time.sleep(TAB_SWITCH_DELAY)
+            time.sleep(ESPERAR)
             count += 1
 
 if __name__ == "__main__":
