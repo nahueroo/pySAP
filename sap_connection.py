@@ -1,24 +1,45 @@
 import win32com.client
+from constantes import *
 
-def obtener_session_sap():
-
-    try:
-        SapGuiAuto  = win32com.client.GetObject("SAPGUI")
-        application = SapGuiAuto.GetScriptingEngine
-        connection = application.Children(0)
-        session = connection.Children(0)
-        if session is None:
-            print("Error: No se pudo obtener sesion SAP valida")
-            return None
+def get_session():
         
-        return session
-    
-    except AttributeError as e:
-        print(f"Error: SAP no esta abierto o no esta disponible: {e}")
-        return None
-    except IndexError as e:
-        print(f"Error: No hay conexion o sesion activa: {e}")
-        return None
-    except Exception as e:
-        print(f"Error inesperado al conectar con SAP: {e}")
-        return None
+    SapGuiAuto  = win32com.client.GetObject("SAPGUI")
+    application = SapGuiAuto.GetScriptingEngine
+    connection = application.Children(0)
+    session = connection.Children(0)
+
+    if session is None:
+        raise RuntimeError("No se pudo obtener una sesion SAP")
+
+def get_grid(session):
+    return session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell")
+
+def get_columns(session):
+    grid = get_grid(session)
+
+    for i in range(grid.ColumnCount):
+        print(i, grid.ColumnOrder[i])
+
+def selectCell(session, fila):
+    grid = get_grid(session)
+    grid.CurrentCellRow = fila
+    grid.SetCurrentCell(fila, "KTEXT")
+
+def get_numero_de_acta(session,ktext)->int:
+    came = selectCell(session,ktext)
+    return int(came.split("ACTA_")[1])
+
+def get_came_toolbox(session):
+    session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
+
+def get_care_toolbox(session):
+    session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
+
+def get_care_field(session):
+    campo = session.findById(MAUFNR)
+    campo.setFocus()
+    campo.caretPosition = 7
+
+def select_first_row(session):
+    session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(0).selected = True
+    session.findById("wnd[1]").sendVKey(0) # enter

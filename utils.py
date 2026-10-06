@@ -4,65 +4,47 @@ import json
 import os
 import shutil
 import csv
+from sap_connection import *
 from pausa import traer_consola_al_frente 
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
 from constantes import RUTA_SAP_DESCARGAS, MAUFNR, AVISO,ESPERAR,ESPERARLARGO
 
-def get_grid(session):
-    return session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell")
-
-def cursorPosTxtBreve(session, fila) -> str:
-    grid = get_grid(session)
-    grid.CurrentCellRow = fila
-    grid.SetCurrentCell(fila, "KTEXT")
-    return grid
-
-def ver_columnas(session):
-    grid = session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell")
-
-    for i in range(grid.ColumnCount):
-        print(i, grid.ColumnOrder[i])
-
 def ingreso_a_came(session,fila)->str:
-    came = cursorPosTxtBreve(session,fila)
+    came = selectCell(session,fila)
     
     came.doubleClickCurrentCell()
+
     datos["Texto Breve"] = get_textoBreve(session)
     datos["Clase de actividad"] = get_claseActividad(session)
     datos["Ubicacion Tecnica"] = get_UT(session)
+
     return came
 
 def ver_fotos_en_came(session,carpeta_destino,sufijo):
-    session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")
-
+    
+    get_came_toolbox(session)
+    
     hayfotos = abrir_fotos_came(session,carpeta_destino,sufijo)
     if not hayfotos:
         time.sleep(ESPERAR)
         abrir_pdf_came(session,carpeta_destino,sufijo)
-        print("se ejecuto abrir pdf")
 
 def entrar_a_care(session):
-    campo = session.findById(MAUFNR)
-    campo.setFocus()
-    campo.caretPosition = 7
+    get_care_field(session)
     time.sleep(ESPERAR)
-    campo = session.findById(MAUFNR)
-    campo.setFocus()
-    campo.caretPosition = 7
+    get_care_field(session)
+    
     datos["Ubicacion Aviso"] = get_textoBreveCare(session)
     datos["Clase de actividad aviso"] =  get_claseActividad(session)
+    
     session.findById("wnd[0]").sendVKey(2) #F2
-    print("Se ejecuto F2")
 
 def ver_fotos_en_care(session,carpeta_destino,sufijo):
     docsAviso = docsOrden = imagenesOrden = imagenesAviso = False
     
-    # Primera fila (row 0)
-    session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
-
-    session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(0).selected = True
-    session.findById("wnd[1]").sendVKey(0) # enter
+    get_care_toolbox(session)
+    select_first_row(session)
 
     session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
     time.sleep(ESPERARLARGO)
@@ -111,10 +93,6 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo):
         print("Documentos encontrados en AVISO")
     
     fotosEncontradas = docsAviso or docsOrden or imagenesAviso or imagenesOrden 
-
-    # Si no se encontraron fotos en ninguna de las dos filas, acceder directamente a documentos
-    if not fotosEncontradas:
-        print("No se encontraron fotos. Revisa los a documentos...")
 
 def entrar_a_aviso(session):
     # Cerrar ventanas adicionales que puedan estar abiertas
