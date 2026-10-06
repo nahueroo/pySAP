@@ -1,28 +1,37 @@
 import time
 import pyautogui
-import win32gui
 import json
 import os
 import shutil
 import csv
-from pausa import pausa_por_consola, traer_consola_al_frente
+from pausa import traer_consola_al_frente 
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
 from constantes import RUTA_SAP_DESCARGAS, MAUFNR, AVISO,ESPERAR,ESPERARLARGO
 
-def obtener_acta_actual(session)->str:
+def get_grid(session):
+    return session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell")
+
+def cursorPosTxtBreve(session, fila) -> str:
+    grid = get_grid(session)
+    grid.CurrentCellRow = fila
+    grid.SetCurrentCell(fila, "KTEXT")
+    return grid
+
+def ver_columnas(session):
     grid = session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell")
-    fila = grid.CurrentCellRow
-    columna = grid.CurrentCellColumn
-    return grid.GetCellValue(fila,columna)
 
-def ingreso_a_came(session):
-    session.findById("wnd[0]").maximize()
+    for i in range(grid.ColumnCount):
+        print(i, grid.ColumnOrder[i])
 
-    session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell").doubleClickCurrentCell()
+def ingreso_a_came(session,fila)->str:
+    came = cursorPosTxtBreve(session,fila)
+    
+    came.doubleClickCurrentCell()
     datos["Texto Breve"] = get_textoBreve(session)
     datos["Clase de actividad"] = get_claseActividad(session)
     datos["Ubicacion Tecnica"] = get_UT(session)
+    return came
 
 def ver_fotos_en_came(session,carpeta_destino,sufijo):
     session.findById("wnd[0]/titl/shellcont/shell").pressButton("%GOS_TOOLBOX")

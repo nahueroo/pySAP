@@ -1,8 +1,6 @@
 from scripts import principal
-from sap_connection import obtener_session_sap
-from utils import mostrar_ultimo_guardado, traer_consola_al_frente,obtener_acta_actual
+from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 from pausa import limpiar_consola
-from datetime import datetime
 import os
 
 def mostrar_menu():
@@ -10,7 +8,7 @@ def mostrar_menu():
     print("\n---MENU ---\b\b")
     print("1. Corregir un acta")
     print("2. Mostrar ultima guardada")
-    print("3. Bajar fotos")
+    print("3. Bajar fotos de todas las cames")
     print("4. Correccion DH")
     print("5. Salir")
 
@@ -26,21 +24,14 @@ def main():
         opcion = input("Opcion?\n")
 
         if opcion == "1":
-            principal("corregir")
+            principal("corregir",0)
         elif opcion == "2":
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
         elif opcion == "3":
-            acta = input("Hasta que acta[copiar texto breve completo]: ")
-            session = obtener_session_sap()
-            actaActual = obtener_acta_actual(session)
-            while acta != actaActual:
-                principal("descarga")
+                principal("descarga",0)
         elif opcion == "4":
-            acta = input("Hasta que acta[copiar texto breve completo]: ")
-            actaActual = obtener_acta_actual(session)
-            while acta != actaActual:
-                principal("dh")
+                principal("dh",0)
         elif opcion == "5":
             print("Saliendo...")
             break
