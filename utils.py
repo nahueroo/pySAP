@@ -2,13 +2,12 @@ import time
 import pyautogui
 import json
 import os
-import shutil
 import csv
 from sap_connection import *
 from pausa import traer_consola_al_frente 
 from getters import *
 from globales import datos, esperar_elemento, esperar_popup
-from constantes import RUTA_SAP_DESCARGAS, MAUFNR, AVISO,ESPERAR,ESPERARLARGO
+from constantes import RUTA_SAP_DESCARGAS,ESPERAR,ESPERARLARGO
 
 def ingreso_a_came(session,fila)->str:
     came = selectCell(session,fila)
@@ -38,73 +37,37 @@ def entrar_a_care(session):
     datos["Ubicacion Aviso"] = get_textoBreveCare(session)
     datos["Clase de actividad aviso"] =  get_claseActividad(session)
     
-    session.findById("wnd[0]").sendVKey(2) #F2
+    sendKey(session, 2) #F2
 
 def ver_fotos_en_care(session,carpeta_destino,sufijo):
-    docsAviso = docsOrden = imagenesOrden = imagenesAviso = False
+
+    # row == 0 es orden, row == 1 es aviso
+
+    row = 0
+    while row < 2:
     
-    get_care_toolbox(session)
-    select_first_row(session)
-
-    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
-    time.sleep(ESPERARLARGO)
-    if session.Children.Count > 1:
-        print("No hay imagenes en ORDEN DE MANTENIMIENTO")
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()        
-    else:
-        imagenesOrden = True
-        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
-        print("Imagenes encontradas en ORDEN DE MANTENIMIENTO")
-
-    session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
-    time.sleep(ESPERARLARGO)
-    if session.Children.Count > 1:
-        print("No hay docs en ORDEN DE MANTENIMIENTO")
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
-    else:
-        docsOrden = True
-        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
-        print("Documentos encontrados en ORDEN DE MANTENIMIENTO")
-
-    # Segunda fila
-    session.findById("wnd[0]/titl/shellcont[1]/shell").pressButton("%GOS_TOOLBOX")
-
-    session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(1).selected = True
-    session.findById("wnd[1]").sendVKey(0)
+        #ORDEN
+        get_care_toolbox(session)
+        select_row(session,row)
     
-    session.findById("wnd[0]/shellcont[1]/shell").pressButton("VIEW_IMAG")
-    time.sleep(ESPERARLARGO)
-    if session.Children.Count > 1:
-        print("No hay imagenes en AVISO")
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
-    else:
-        imagenesAviso = True
-        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
-        print("Imagenes encontradas en AVISO")
+        verfotos(session,row,"VIEW_IMAG")
+        time.sleep(ESPERARLARGO)
+        download_fotos(session,carpeta_destino,sufijo)
 
-    session.findById("wnd[0]/shellcont[1]/shell").pressButton("DOC_LIST")
-    time.sleep(ESPERARLARGO)
-    if esperar_popup(session, timeout=3):
-        print("No hay docs en AVISO")
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
-    else:
-        docsAviso = True
-        mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
-        print("Documentos encontrados en AVISO")
-    
-    fotosEncontradas = docsAviso or docsOrden or imagenesAviso or imagenesOrden 
+        verfotos(session,row,"DOC_LIST")
+        time.sleep(ESPERARLARGO)
+        download_fotos(session,carpeta_destino,sufijo)
+
+        row += 1
+
+    # Cerrar ventanas adicionales que puedan estar abiertas
+    cerrar_ventanas_extra(session)
 
 def entrar_a_aviso(session):
-    # Cerrar ventanas adicionales que puedan estar abiertas
-    while session.Children.Count > 1:
-        try:
-            session.Children(session.Children.Count-1).close()
-        except Exception as e:
-            break
     
-    session.findById(AVISO).press()
-    
-    # Dar más tiempo para que se abra el aviso
+    get_aviso_field(session)
+
+    #chequear si molesta esto
     time.sleep(2)
     
     # Espera a que se abra el aviso
@@ -216,13 +179,6 @@ def _formatear_texto_largo(aviso_text,max_value_width):
 
         return lines
 
-def salir(session):
-    """Simula presionar F3 y luego ENTER para salir"""
-    # Usar SAP GUI directamente en lugar de pyautogui
-    session.findById("wnd[0]").sendVKey(15)  # F3 en SAP
-    time.sleep(ESPERARLARGO)
-    session.findById("wnd[0]").sendVKey(0)   # ENTER en SAP
-
 def guardar_datos_ultimo():
     """Guarda los datos actuales en un archivo JSON"""
     try:
@@ -296,64 +252,6 @@ def crear_carpeta_acta(texto_breve):
     except Exception as e:
         print(f"Error al crear carpeta acta: {e}")
         return None
-
-def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
-    """
-    Mueve las fotos a la carpeta creada.
-    Los renombra agregando CAME o CARE de acuerdo a de donde son.
-
-    Args:
-        carpeta_destino: Ruta donde mover los archivos
-        sufijo: Sufijo a agregar al nombre ("CAME", "CARE")
-    """
-    try:
-        ruta_sap = RUTA_SAP_DESCARGAS
-
-        # Verificar si la carpeta de origen existe
-        if not os.path.exists(ruta_sap):
-            print(f"Carpeta SAP no encontrada: {ruta_sap}")
-            return False
-
-        # Obtener lista de archivos
-        archivos = os.listdir(ruta_sap)
-
-        if not archivos:
-            print(f"No hay archivos en la carpeta SAP GUI para {sufijo}")
-            return False
-
-        contador = 0
-        for archivo in archivos:
-            ruta_origen = os.path.join(ruta_sap, archivo)
-
-            # Solo procesar archivos, no carpetas
-            if os.path.isfile(ruta_origen):
-                # Separar nombre y extensión
-                nombre_base, extension = os.path.splitext(archivo)
-
-                # Crear nuevo nombre con sufijo
-                nuevo_nombre = f"{nombre_base}_{sufijo}{extension}"
-                ruta_destino = os.path.join(carpeta_destino, nuevo_nombre)
-
-                contador_nombre = 1
-                
-                while os.path.exists(ruta_destino):
-                    nuevo_nombre = f"{nombre_base}_{sufijo} ({contador_nombre}){extension}"
-                    ruta_destino = os.path.join(carpeta_destino, nuevo_nombre)
-                    contador_nombre += 1
-
-                try:
-                    shutil.move(ruta_origen, ruta_destino)
-                    contador += 1
-                except Exception as e:
-                    print(f"Error moviendo {archivo}: {e}")
-
-        if contador > 0:
-            print(f"Se movieron {contador} archivo(s) con sufijo _{sufijo} a {carpeta_destino}")
-
-        return True
-    except Exception as e:
-        print(f"Error al mover archivos SAP: {e}")
-        return False
 
 def guardar_datos_txt(carpeta_destino, datos_dict):
     """

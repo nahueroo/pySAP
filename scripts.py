@@ -1,20 +1,19 @@
 from cerrarpestanias import cerrar_pestanas
 from utils import *
 from pausa import pausa
-from sap_connection import obtener_session_sap
+from sap_connection import get_session
 from constantes import CANCEL,ESPERAR,ESPERARLARGO
 import win32gui
 
 def principal(modo,fila)->str:
     
-    session = obtener_session_sap()
+    session = get_session()
     if session is None:
+        print("session not NONE")
         return
 
-    #hwnd = session.findById("wnd[0]").Handle
-
     grid = get_grid(session)
-    ultimaFila = grid.RowCount -1
+    ultimaFila = grid.RowCount
     if fila >= ultimaFila:
         return
 
@@ -28,12 +27,17 @@ def principal(modo,fila)->str:
 
     ver_fotos_en_came(session,carpeta_acta, "CAME")
     if modo == "dh":
-        salir(session)
+        volver(session)
         fila += 1
-        return principal(session,fila)
+        return principal(modo,fila)
     
     entrar_a_care(session)
     ver_fotos_en_care(session,carpeta_acta, "CARE")
+    if modo == "descargarfotos":
+        volver(session)
+        volver(session)
+        fila += 1
+        return principal(modo,fila)
 
     entrar_a_aviso(session)
     aceptar_g02(session)
@@ -43,21 +47,14 @@ def principal(modo,fila)->str:
     # El final del proceso lo define el usuario con ESC o ENTER
     if modo == "corregir":
         exit_code = pausa()
-        if exit_code == CANCEL:  # ESC
-            cerrar_pestanas()
-            salir(session)
-        else:  # ENTER
-            cerrar_pestanas()
+        if exit_code == CONTINUE:  # ESC
             cgi(session)
 
     cerrar_pestanas()
     time.sleep(ESPERAR)
-    salir(session)
-
-    #win32gui.SetForegroundWindow(hwnd)
+    volver(session)
 
     time.sleep(ESPERAR)
-    #pyautogui.press('down')
     fila+=1
 
     time.sleep(ESPERARLARGO)

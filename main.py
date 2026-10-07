@@ -8,9 +8,10 @@ def mostrar_menu():
     print("\n---MENU ---\b\b")
     print("1. Corregir un acta")
     print("2. Mostrar ultima guardada")
-    print("3. Bajar fotos de todas las cames")
-    print("4. Correccion DH")
-    print("5. Salir")
+    print("3. Bajar data de todas las cames")
+    print("4. Bajar fotos de todas las cames")
+    print("5. Correccion DH")
+    print("6. Salir")
 
 def main():
     # Crear carpeta actas al inicio
@@ -31,8 +32,10 @@ def main():
         elif opcion == "3":
                 principal("descarga",0)
         elif opcion == "4":
-                principal("dh",0)
+                principal("descargarfotos",0)        
         elif opcion == "5":
+                principal("dh",0)
+        elif opcion == "6":
             print("Saliendo...")
             break
         else:
