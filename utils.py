@@ -35,6 +35,8 @@ def ver_fotos_en_came(session,carpeta_destino,sufijo):
 
 def entrar_a_care(session):
     get_care_field(session)
+    time.sleep(0.4)
+    get_care_field(session)
     
     datos["Ubicacion Aviso"] = get_textoBreveCare(session)
     datos["Clase de actividad aviso"] =  get_claseActividad(session)
