@@ -390,5 +390,3 @@ def _mostrar_tabla_datos(datos_dict):
             print(f"| {'Aviso'.ljust(max_key_width)} | {' '.ljust(max_value_width)} |")
 
     print(separator)
-
-    # FUNCIONES AUXILIARES
