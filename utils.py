@@ -6,11 +6,14 @@ import csv
 from sap_connection import *
 from pausa import traer_consola_al_frente 
 from getters import *
-from globales import datos, esperar_elemento, esperar_popup
-from constantes import RUTA_SAP_DESCARGAS,ESPERAR,ESPERARLARGO
+from globales import datos, esperar_elemento
 
-def ingreso_a_came(session,fila)->str:
-    came = selectCell(session,fila)
+def ingreso_a_came(session,fila=None)->str:
+    
+    if fila is not None:
+        came = selectCell(session,fila)
+    else:
+        came = get_grid(session)
     
     came.doubleClickCurrentCell()
 
@@ -21,17 +24,16 @@ def ingreso_a_came(session,fila)->str:
     return came
 
 def ver_fotos_en_came(session,carpeta_destino,sufijo):
+
+    # "DOC_LIST" O "VIEW_IMAG"
     
     get_came_toolbox(session)
-    
-    hayfotos = abrir_fotos_came(session,carpeta_destino,sufijo)
+    hayfotos = fotosCame(session, carpeta_destino,sufijo)
     if not hayfotos:
-        time.sleep(ESPERAR)
-        abrir_pdf_came(session,carpeta_destino,sufijo)
+        time.sleep(0.3)
+        pdfCame(session,carpeta_destino,sufijo)
 
 def entrar_a_care(session):
-    get_care_field(session)
-    time.sleep(ESPERAR)
     get_care_field(session)
     
     datos["Ubicacion Aviso"] = get_textoBreveCare(session)
@@ -45,46 +47,44 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo):
 
     row = 0
     while row < 2:
+
+        if row == 0:
+            sufijo = "CARE - ORDEN DE MANTENIMIENTO"
+        if row == 1:
+            sufijo = "CARE - AVISO"
     
-        #ORDEN
         get_care_toolbox(session)
         select_row(session,row)
     
-        verfotos(session,row,"VIEW_IMAG")
-        time.sleep(ESPERARLARGO)
+        verfotosCARE(session,row,"VIEW_IMAG")
+        time.sleep(0.3)
         download_fotos(session,carpeta_destino,sufijo)
 
-        verfotos(session,row,"DOC_LIST")
-        time.sleep(ESPERARLARGO)
+        verfotosCARE(session,row,"DOC_LIST")
+        time.sleep(0.3)
         download_fotos(session,carpeta_destino,sufijo)
 
         row += 1
 
-    # Cerrar ventanas adicionales que puedan estar abiertas
     cerrar_ventanas_extra(session)
 
 def entrar_a_aviso(session):
     
     get_aviso_field(session)
-
-    #chequear si molesta esto
-    time.sleep(2)
+    time.sleep(0.3)
     
-    # Espera a que se abra el aviso
-    elemento_esperado = "wnd[0]/usr/subSCREEN_1:SAPLIQS0:1050/subNOTIF_TYPE:SAPLIQS0:1051/ctxtVIQMEL-QMART"
-    if esperar_elemento(session, elemento_esperado, timeout=5):
-        datos["Tipo Aviso"] = get_aviso_tipo(session)
-        datos["Autor Aviso"] = get_aviso_autor(session)
-        datos["Fecha Aviso"] = get_aviso_fecha(session)
-        datos["Servicio"] = get_aviso_servicio(session)
+    datos["Tipo Aviso"] = get_aviso_tipo(session)
+    datos["Autor Aviso"] = get_aviso_autor(session)
+    datos["Fecha Aviso"] = get_aviso_fecha(session)
+    datos["Servicio"] = get_aviso_servicio(session)
         
-        # Obtener texto largo del aviso en una sola línea
-        texto_largo = get_texto_aviso(session)
-        if texto_largo:
-            # Convertir saltos de línea a espacios para que quede en una sola línea
-            datos["Aviso"] = texto_largo.replace('\n', ' ').replace('\r', ' ')
-        else:
-            datos["Aviso"] = "Sin texto disponible"
+    # Obtener texto largo del aviso en una sola línea
+    texto_largo = get_texto_aviso(session)
+    if texto_largo:
+        # Convertir saltos de línea a espacios para que quede en una sola línea
+        datos["Aviso"] = texto_largo.replace('\n', ' ').replace('\r', ' ')
+    else:
+        datos["Aviso"] = "Sin texto disponible"
 
 def aceptar_g02(session):
     session.findById("wnd[0]/tbar[0]/btn[3]").press()
@@ -218,40 +218,6 @@ def mostrar_ultimo_guardado():
         print(f"\nÚltimos datos guardados el: {datos_guardados['timestamp']}")
         
     _mostrar_tabla_datos(datos_guardados)
-
-def sanitizar_nombre_carpeta(texto):
-    """Convierte un texto en un nombre de carpeta válido"""
-    if not texto:
-        return "sin_nombre"
-    # Reemplazar caracteres inválidos para nombres de carpeta
-    invalidos = '<>:"/\\|?*'
-    for char in invalidos:
-        texto = texto.replace(char, '_')
-    # Remover espacios al inicio/final y limitar longitud
-    return texto.strip()[:100]
-
-def crear_carpeta_acta(texto_breve):
-    """
-    Crea una carpeta dentro de 'actas' con el nombre del texto breve
-    Retorna la ruta de la carpeta creada
-    """
-    try:
-        # Crear carpeta principal actas si no existe
-        os.makedirs("actas", exist_ok=True)
-
-        # Sanitizar el nombre del texto breve
-        nombre_carpeta = sanitizar_nombre_carpeta(texto_breve)
-
-        # Crear ruta completa
-        carpeta_acta = os.path.join("actas", nombre_carpeta)
-
-        # Crear carpeta acta
-        os.makedirs(carpeta_acta, exist_ok=True)
-
-        return carpeta_acta
-    except Exception as e:
-        print(f"Error al crear carpeta acta: {e}")
-        return None
 
 def guardar_datos_txt(carpeta_destino, datos_dict):
     """
@@ -426,83 +392,3 @@ def _mostrar_tabla_datos(datos_dict):
     print(separator)
 
     # FUNCIONES AUXILIARES
-
-def abrir_fotos_came(session,carpeta_destino,sufijo):
-    
-    #Abre Visualizar imagenes
-    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_IMAG")
-    
-    # Espera a que aparezca el popup
-    if esperar_popup(session, timeout=3):
-        # presiona el botón Aceptar en el popup
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
-        return False
-    
-    mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
-    return True
-
-def abrir_doc_list_came(session,carpeta_destino, sufijo):
-    
-    # abre Lista de documentos
-    session.findById("wnd[0]/shellcont/shell").pressButton("DOC_LIST")
-    
-    # Espera a que aparezca el popup
-    if esperar_popup(session, timeout=3):
-        # presiona el botón Aceptar en el popup
-        session.findById("wnd[1]/tbar[0]/btn[0]").press()
-        return False
-    
-    mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
-    return True
-
-def abrir_pdf_came(session,carpeta_destino, sufijo):
-
-    session.findById("wnd[0]/shellcont/shell").pressButton("VIEW_DOC")
-
-    # Espera a que aparezca el popup
-    popup = esperar_popup(session, timeout=3)
-    if popup:
-        # presiona el botón Aceptar en el popup
-        try:
-            boton = session.findById("wnd[1]/tbar[0]/btn[0]")
-            boton.press()
-        except Exception:
-            print("No apareció el popup o no existe el botón Aceptar.")
-    
-    
-    # Espera a que aparezca la ventana con la grid
-    if esperar_elemento(session, "wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell", timeout=3):
-        grid = session.findById("wnd[1]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell")
-        
-        # Obtener el número total de filas en la grid
-        row_count = grid.RowCount
-        
-        # Iterar a través de todas las filas
-        for row_index in range(row_count):
-            try:
-                # Seleccionar la fila actual
-                grid.currentCellRow = row_index
-                grid.currentCellColumn = "NOMBRE"
-                
-                # Verificar si la celda tiene contenido
-                cell_value = grid.getCellValue(row_index, "NOMBRE")
-                
-                # Si la celda está vacía, terminar el bucle
-                if not cell_value or cell_value.strip() == "":
-                    break
-                
-                # Hacer doble clic en la celda con contenido
-                grid.doubleClickCurrentCell()
-                
-                # Pequeña pausa entre selecciones para estabilidad
-                time.sleep(ESPERARLARGO)
-                mover_y_renombrar_archivos_sap(carpeta_destino,sufijo)
-                
-            except Exception as e:
-                # Si hay error al acceder a una fila, probablemente llegamos al final
-                print(f"Error al procesar fila {row_index}: {e}")
-                break
-        
-        # Cerrar las ventanas después de procesar todas las filas
-        session.findById("wnd[1]").close()
-        session.findById("wnd[0]/shellcont").close()

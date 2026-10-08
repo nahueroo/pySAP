@@ -1,5 +1,4 @@
 import time
-from constantes import ESPERAR
 
 datos = {
     "Texto Breve" : None,
@@ -26,17 +25,6 @@ def esperar_elemento(session, elemento_id, timeout=5):
             if elemento:
                 return True
         except:
-            time.sleep(ESPERAR)
+            time.sleep(0.3)
     
-    return False
-
-def esperar_popup(session, timeout=5):
-    """Espera hasta que aparezca un popup"""
-    tiempo_inicial = time.time()
-
-    while time.time() - tiempo_inicial < timeout:
-        if session.Children.Count > 1:
-            return True
-        time.sleep(ESPERAR)
-
     return False

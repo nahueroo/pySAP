@@ -2,14 +2,13 @@ from cerrarpestanias import cerrar_pestanas
 from utils import *
 from pausa import pausa
 from sap_connection import get_session
-from constantes import CANCEL,ESPERAR,ESPERARLARGO
-import win32gui
+from debugtools import *
 
 def principal(modo,fila)->str:
     
     session = get_session()
     if session is None:
-        print("session not NONE")
+        print("Session not NONE")
         return
 
     grid = get_grid(session)
@@ -17,7 +16,10 @@ def principal(modo,fila)->str:
     if fila >= ultimaFila:
         return
 
-    ingreso_a_came(session,fila)
+    if modo == "corregir":
+        ingreso_a_came(session)
+    else:
+        ingreso_a_came(session,fila)
 
     # Crear carpeta acta con el nombre del Texto Breve
     carpeta_acta = crear_carpeta_acta(datos.get("Texto Breve", "sin_nombre"))
@@ -51,14 +53,28 @@ def principal(modo,fila)->str:
             cgi(session)
 
     cerrar_pestanas()
-    time.sleep(ESPERAR)
+    time.sleep(0.3)
     volver(session)
 
-    time.sleep(ESPERAR)
+    time.sleep(0.3)
     fila+=1
 
-    time.sleep(ESPERARLARGO)
+    time.sleep(0.6)
     if fila < ultimaFila and (modo == "descarga" or modo == "dh"):
         return principal(modo,fila)
     else:
         return
+
+def debug(func):
+    
+    session = get_session()
+    if session is None:
+        print("session not NONE")
+        return
+        
+    if func == 1:
+        debug_window(session)
+        input("ok?")
+    if func == 2:
+        inspect_object(session)
+        input("ok?")

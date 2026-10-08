@@ -1,4 +1,4 @@
-from scripts import principal
+from scripts import principal,debug
 from utils import mostrar_ultimo_guardado, traer_consola_al_frente
 from pausa import limpiar_consola
 import os
@@ -12,6 +12,13 @@ def mostrar_menu():
     print("4. Bajar fotos de todas las cames")
     print("5. Correccion DH")
     print("6. Salir")
+
+def mostrar_debug_menu():
+    print("\n---MENU DEBUG---\b\b")
+    print("1. Inspeccionar ventana")
+    print("2. Inspeccionar textos")
+    print("3. Inspeccionar tipos")
+    print("4. Salir")
 
 def main():
     # Crear carpeta actas al inicio
@@ -38,6 +45,21 @@ def main():
         elif opcion == "6":
             print("Saliendo...")
             break
+        elif opcion == "7":
+            while True:
+                limpiar_consola()
+                traer_consola_al_frente()  # Traer consola al frente cada vez que se muestra el menú      
+                mostrar_debug_menu()
+                opcion = input("Opcion?\n")
+                if opcion == "1":
+                    debug(1)
+                elif opcion == "2":
+                    debug(2)
+                elif opcion == "3":
+                    debug(3)
+                elif opcion == "4":
+                    print("Saliendo...")
+                    break
         else:
             print("Opcion invalida, las opciones son [1],[2],[3] y [4]")
 

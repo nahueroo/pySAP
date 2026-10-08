@@ -10,10 +10,6 @@ CANCEL = 1
 ENTER = b'\r'
 ESCAPE = b'\x1b'
 
-# Time Sleep
-ESPERAR = 0.3
-ESPERARLARGO = 0.6
-
 # Nombres Pestañas
 PESTANAS = ["image.html","data.pdf", "Microsoft Word"]
 
@@ -66,3 +62,4 @@ RUTAS_SAP = {
         "aviso_servicio": r"wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/" \
                 r"subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_3:SAPLIQS0:7324/txtVIQMFE-FETXT"
 }
+"wnd[0]/usr/subSCREEN_1:SAPLIQS0:1050/subNOTIF_TYPE:SAPLIQS0:1051/ctxtVIQMEL-QMART"
