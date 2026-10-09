@@ -42,8 +42,8 @@ def principal(modo,fila)->str:
         return principal(modo,fila)
 
     entrar_a_aviso(session)
-    aceptar_g02(session)
-    aceptar_itemizado(session)
+    volveryGuardarOperaciones(session,"care")
+    volveryGuardarOperaciones(session,"came")
     mostrar_datos(carpeta_acta)
 
     # El final del proceso lo define el usuario con ESC o ENTER

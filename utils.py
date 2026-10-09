@@ -41,7 +41,7 @@ def entrar_a_care(session):
     datos["Ubicacion Aviso"] = get_textoBreveCare(session)
     datos["Clase de actividad aviso"] =  get_claseActividad(session)
     
-    sendKey(session, 2) #F2
+    sendKey(session, F2)
 
 def ver_fotos_en_care(session,carpeta_destino,sufijo):
 
@@ -88,56 +88,17 @@ def entrar_a_aviso(session):
     else:
         datos["Aviso"] = "Sin texto disponible"
 
-def aceptar_g02(session):
-    session.findById("wnd[0]/tbar[0]/btn[3]").press()
+def volveryGuardarOperaciones(session,orden):
     
-    # Espera a que se procese y luego selecciona la pestaña
-    if esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=3):
-        session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
-        care_table = getter_care(session)
-        if care_table:
-            print("\n\nItemizado:")
-            print(care_table)
-            # Guardar los datos CARE en el diccionario global
-            datos["Datos CARE"] = care_table
-            # Guardar inmediatamente en el archivo JSON
-            guardar_datos_ultimo()
-        else:
-            print("No se encontraron datos CARE válidos.")
-            datos["Datos CARE"] = "No se encontraron datos CARE válidos."
-            # Guardar inmediatamente en el archivo JSON
-            guardar_datos_ultimo()
-
-def aceptar_itemizado(session):
-    session.findById("wnd[0]/tbar[0]/btn[3]").press()
-    
-    # Espera a que se procese y luego selecciona la pestaña
-    if esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=3):
-        session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE").select()
-        # Espera adicional para que se cargue completamente
-        esperar_elemento(session, "wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpVGUE", timeout=2)
-        came_table = getter_came(session)
-        if came_table:
-            print("\n\nCargado:")
-            print(came_table)
-            # Guardar los datos CAME en el diccionario global
-            datos["Datos CAME"] = came_table
-            # Guardar inmediatamente en el archivo JSON
-            guardar_datos_ultimo()
-        else:
-            print("No se encontraron datos CAME válidos.")
-            datos["Datos CAME"] = "No se encontraron datos CAME válidos."
-            # Guardar inmediatamente en el archivo JSON
-            guardar_datos_ultimo()
+    volver(session)
+    selectOperTab(session)
+    guardar_itemizado(session,orden)
+    guardar_datos_ultimo()
 
 def cgi(session):
-    session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1107/tabsTS_1100/tabpIHKZ").select()
-    session.findById("wnd[0]/usr/subSUB_ALL:SAPLCOIH:3001/ssubSUB_LEVEL:SAPLCOIH:1100/tabsTS_1100/tabpIHKZ/ssubSUB_AUFTRAG:SAPLCOIH:1120/subHEADER:SAPLCOIH:0154/ctxtCAUFVD-INGPR").text = "Cgi"
-    session.findById("wnd[0]/tbar[0]/btn[11]").press()
-    
-    # Espera un poco antes de enviar la tecla
-    if esperar_elemento(session, "wnd[0]", timeout=2):
-        pyautogui.press('down')
+    session.findById(DATOSCABECERA).select()
+    session.findById(GRUPOPLANIFICACION).text = "Cgi"
+    session.findById(GUARDAR).press()
 
 def mostrar_datos(carpeta_acta=None):
     # Guardar los datos actuales antes de mostrarlos

@@ -1,6 +1,8 @@
 import win32com.client
 import shutil
 from constantes import *
+from getters import *
+from globales import *
 import re
 import time
 
@@ -17,7 +19,7 @@ def sendKey(session, key):
     session.findById("wnd[0]").sendVKey(key)
 
 def volver(session):
-    sendKey(session,15)
+    sendKey(session,F3)
 
 # IW38 TOOLS
 
@@ -36,9 +38,18 @@ def selectCell(session, fila):
     grid.SetCurrentCell(fila, "KTEXT")
     return grid
 
-def get_numero_de_acta(session,ktext)->int:
+def get_data_acta(session,ktext,dato):
     came = selectCell(session,ktext)
-    return int(came.split("ACTA_")[1])
+    partes = came.split("_")
+    if dato == "certificado":
+        return int(partes[5])
+    if dato == "acta":
+        return int(partes[7])
+    if dato == "renglon":
+        return partes[3]
+
+def selectOperTab(session):
+    session.findById(OPERTAB).select()
 
 # CAME TOOLS
 
@@ -198,3 +209,21 @@ def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
     except OSError as e:
         print(f"Error al mover archivos SAP: {e}")
         return False
+
+def guardar_itemizado(session,orden):
+
+    if orden == "came":
+        operaciones = getter_came(session)
+        datos = datos["DATOS CAME"]
+        texto = "\n\nCargado:"
+    elif orden == "care":
+        operaciones = getter_care(session)
+        datos = datos["DATOS CARE"]
+        texto = "\n\nItemizado:"
+    
+    if operaciones:
+        print(texto)
+        print(operaciones)
+        datos = operaciones
+    else:
+        datos = "No se encontraron datos válidos."
