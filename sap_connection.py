@@ -214,16 +214,16 @@ def guardar_itemizado(session,orden):
 
     if orden == "came":
         operaciones = getter_came(session)
-        datos = datos["DATOS CAME"]
+        orden = "DATOS CAME"
         texto = "\n\nCargado:"
     elif orden == "care":
         operaciones = getter_care(session)
-        datos = datos["DATOS CARE"]
+        orden = "DATOS CARE"
         texto = "\n\nItemizado:"
     
     if operaciones:
         print(texto)
         print(operaciones)
-        datos = operaciones
+        datos[orden] = operaciones
     else:
-        datos = "No se encontraron datos válidos."
+        datos[orden] = "No se encontraron datos válidos."
