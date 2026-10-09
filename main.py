@@ -1,6 +1,6 @@
 from scripts import principal,debug
-from utils import mostrar_ultimo_guardado, traer_consola_al_frente
-from pausa import limpiar_consola
+from utils import mostrar_ultimo_guardado
+from pausa import limpiar_consola, traer_consola_al_frente
 import os
 
 def mostrar_menu():

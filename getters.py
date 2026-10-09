@@ -1,4 +1,3 @@
-import win32com.client
 from constantes import RUTAS_SAP, LTXA1,DAUNO,ARBEI
 
 def _get_sap_field(session, ruta, nombre_campo="", caret_position=None):

@@ -4,9 +4,8 @@ import json
 import os
 import csv
 from sap_connection import *
-from pausa import traer_consola_al_frente 
 from getters import *
-from globales import datos, esperar_elemento
+from globales import datos
 
 def ingreso_a_came(session,fila=None)->str:
     
