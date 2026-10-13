@@ -244,6 +244,3 @@ def get_texto_aviso(session):
         return None
 
 
-
-
-

@@ -3,6 +3,7 @@ import shutil
 from constantes import *
 from getters import *
 from globales import *
+from copy import deepcopy
 import re
 import time
 
@@ -20,6 +21,43 @@ def sendKey(session, key):
 
 def volver(session):
     sendKey(session,F3)
+
+def get_data_came(session, fila=None):
+    
+    grid = get_grid(session)
+
+    if fila is not None:
+        grid.CurrentCellRow = fila
+
+    datos_came = {}
+
+    for i in range(grid.ColumnCount):
+        campo = grid.ColumnOrder[i]
+
+        try:
+            valor = grid.GetCellValue(grid.CurrentCellRow, campo)
+        except:
+            valor = None
+
+        # TRADUCE NOMBRE TECNICO A COLOQUIAL
+        nombre = campos_ordenes.get(campo,campo)
+        datos_came[nombre] = valor
+
+    orden = datos_came.get("Orden")
+
+    # CHEQUEA SI LA CAME ES VALIDA Y EXISTE
+    if orden:
+        if orden not in datos["cames"]:
+            datos["cames"][orden] = deepcopy(came)
+
+    datos["cames"][orden].update(datos_came)
+
+    return datos_came
+
+def vincular_ordenes():
+
+    for care in datos["cares"].values():
+        care["came"] = {}
 
 # IW38 TOOLS
 

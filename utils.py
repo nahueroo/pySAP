@@ -5,9 +5,12 @@ import os
 import csv
 from sap_connection import *
 from getters import *
-from globales import datos
+from globales import *
 
 def ingreso_a_came(session,fila=None)->str:
+
+    datos = get_data_came(session,fila)
+    print(datos)
     
     if fila is not None:
         came = selectCell(session,fila)
@@ -20,7 +23,7 @@ def ingreso_a_came(session,fila=None)->str:
     datos["Clase de actividad"] = get_claseActividad(session)
     datos["Ubicacion Tecnica"] = get_UT(session)
 
-    return came
+    return came,datos
 
 def ver_fotos_en_came(session,carpeta_destino,sufijo):
 

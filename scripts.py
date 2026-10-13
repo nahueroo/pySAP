@@ -13,16 +13,17 @@ def principal(modo,fila)->str:
 
     grid = get_grid(session)
     ultimaFila = grid.RowCount
+    print(ultimaFila)
     if fila >= ultimaFila:
         return
 
     if modo == "corregir":
-        ingreso_a_came(session)
+        _, datos = ingreso_a_came(session)
     else:
-        ingreso_a_came(session,fila)
+        _, datos = ingreso_a_came(session,fila)
 
     # Crear carpeta acta con el nombre del Texto Breve
-    carpeta_acta = crear_carpeta_acta(datos.get("Texto Breve", "sin_nombre"))
+    carpeta_acta = crear_carpeta_acta(datos["Texto Breve"])
     if not carpeta_acta:
         print("No se pudo crear la carpeta, proceso cancelado.")
         return
@@ -52,7 +53,7 @@ def principal(modo,fila)->str:
         if exit_code == CONTINUE:  # ESC
             cgi(session)
 
-    cerrar_pestanas()
+    #cerrar_pestanas()
     time.sleep(0.3)
     volver(session)
 
