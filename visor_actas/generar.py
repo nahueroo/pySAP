@@ -1764,6 +1764,7 @@ def mostrar_todas_operaciones_came(
     campos_filtro = {
         "acta": set(),
         "texto-breve": set(),
+        "item": set(),
         "clave-control": set(),
         "duracion": set(),
         "largo": set(),
@@ -1845,10 +1846,12 @@ def mostrar_todas_operaciones_came(
             )
             servicio = re.sub(r"\s*:\s*\d+\s*$", "", servicio).strip()
             clave_control = operacion.get("Clave de control", "")
+            item = item_preciario(clave_control)
             control = operacion.get("Clave de control operacion", "")
             valores_filtro = {
                 "acta": acta,
                 "texto-breve": came.get("Texto Breve", ""),
+                "item": item,
                 "clave-control": clave_control,
                 "duracion": duracion,
                 "largo": largo,
@@ -1867,6 +1870,7 @@ def mostrar_todas_operaciones_came(
             filas.append(f"""
                 <tr data-acta="{esc(acta, '')}"
                     data-texto-breve="{esc(came.get("Texto Breve"), '')}"
+                    data-item="{esc(item, '')}"
                     data-area="{esc(area, '')}"
                     data-clase="{esc(clase, '')}"
                     data-unidad="{esc(unidad, '')}"
@@ -1883,7 +1887,7 @@ def mostrar_todas_operaciones_came(
                     data-servicio="{esc(servicio, '')}">
                     <td>{esc(acta)}</td>
                     <td>{esc(came.get("Texto Breve"))}</td>
-                    <td>{esc(operacion.get("Clave de control"))}</td>
+                    <td>{esc(item)}</td>
                     <td>{esc(duracion)}</td>
                     <td>{esc(largo)}</td>
                     <td>{esc(ancho)}</td>
@@ -1897,7 +1901,7 @@ def mostrar_todas_operaciones_came(
     columnas_globales = (
         ("acta", "Acta", False),
         ("texto-breve", "Texto breve", True),
-        ("clave-control", "Clave de control", True),
+        ("item", "Item", True),
         ("duracion", "Duración normal", False),
         ("largo", "Largo", False),
         ("ancho", "Ancho", False),
@@ -1940,6 +1944,7 @@ def mostrar_todas_operaciones_came(
                     )
                     + "</select>"
                     for campo, etiqueta in (
+                        ("clave-control", "Clave de control"),
                         ("materialidad", "Materialidad CARE"),
                         ("clase-actividad", "Clase de actividad"),
                         ("servicio", "Servicio asociado"),
