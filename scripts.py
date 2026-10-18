@@ -1,8 +1,8 @@
 from cerrarpestanias import cerrar_pestanas
 from utils import *
 from pausa import pausa
-from sap_connection import get_session
-from debugtools import *
+from sap_connection import get_session, __debug_data_iw
+
 
 def principal(modo,fila)->str:
     
@@ -13,16 +13,17 @@ def principal(modo,fila)->str:
 
     grid = get_grid(session)
     ultimaFila = grid.RowCount
+    print(ultimaFila)
     if fila >= ultimaFila:
         return
 
     if modo == "corregir":
-        ingreso_a_came(session)
+        _, datos = ingreso_a_came(session)
     else:
-        ingreso_a_came(session,fila)
+        _, datos = ingreso_a_came(session,fila)
 
     # Crear carpeta acta con el nombre del Texto Breve
-    carpeta_acta = crear_carpeta_acta(datos.get("Texto Breve", "sin_nombre"))
+    carpeta_acta = crear_carpeta_acta(datos["Texto Breve"])
     if not carpeta_acta:
         print("No se pudo crear la carpeta, proceso cancelado.")
         return
@@ -52,7 +53,7 @@ def principal(modo,fila)->str:
         if exit_code == CONTINUE:  # ESC
             cgi(session)
 
-    cerrar_pestanas()
+    #cerrar_pestanas()
     time.sleep(0.3)
     volver(session)
 
@@ -65,16 +66,31 @@ def principal(modo,fila)->str:
     else:
         return
 
+def getter(tipo,fila):
+    
+    session = get_session()
+    
+    if session is None:
+        print("Session not NONE")
+        return
+
+    grid = get_grid(session)
+    ultimaFila = grid.RowCount
+    
+    if fila >= ultimaFila:
+        return
+   
+    get_data_iw(session,tipo, fila)
+    fila+=1
+
+    return getter(tipo,fila)
+
 def debug(func):
     
     session = get_session()
     if session is None:
         print("session not NONE")
         return
-        
+
     if func == 1:
-        debug_window(session)
-        input("ok?")
-    if func == 2:
-        inspect_object(session)
-        input("ok?")
+        __debug_data_iw(session)

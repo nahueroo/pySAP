@@ -6,3 +6,5 @@ build/
 *.spec
 dist/
 ultimo_guardado.json
+datos_sap
+visor_actas/salida/

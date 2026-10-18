@@ -3,6 +3,7 @@ import shutil
 from constantes import *
 from getters import *
 from globales import *
+from copy import deepcopy
 import re
 import time
 
@@ -21,6 +22,142 @@ def sendKey(session, key):
 def volver(session):
     sendKey(session,F3)
 
+def get_data_came(session, fila=None):
+    
+    grid = get_grid(session)
+
+    if fila is not None:
+        grid.CurrentCellRow = fila
+
+    datos_came = {}
+
+    for i in range(grid.ColumnCount):
+        campo = grid.ColumnOrder[i]
+
+        try:
+            valor = grid.GetCellValue(grid.CurrentCellRow, campo)
+        except:
+            valor = None
+
+        # TRADUCE NOMBRE TECNICO A COLOQUIAL
+        nombre = campos_ordenes.get(campo,campo)
+        datos_came[nombre] = valor
+
+    orden = datos_came.get("Orden")
+
+    # CHEQUEA SI LA CAME ES VALIDA Y EXISTE
+    if orden:
+        if orden not in datos["cames"]:
+            datos["cames"][orden] = deepcopy(came)
+
+    datos["cames"][orden].update(datos_came)
+
+    return datos_came
+
+def get_data_iw(session,tipo,fila=None):
+    
+    tipos = {
+        "aviso": ("aviso",aviso,"Numero de aviso"),
+        "care": ("care",care,"Orden"), 
+        "came": ("came",came,"Orden"), 
+    }
+
+    nombre_diccionario,plantilla,key = tipos[tipo]
+
+    grid = get_grid(session)
+
+    if fila is not None:
+        grid.CurrentCellRow = fila
+
+    actualRow = grid.CurrentCellRow
+    equivalencias_tipo = equivalencias[tipo]
+
+    registro = {}
+
+    for i in range(grid.ColumnCount):
+        campo = grid.ColumnOrder[i]
+
+        try:
+            valor = grid.GetCellValue(actualRow,campo)
+        except Exception:
+            continue
+
+        nombre_campo = equivalencias_tipo.get(campo,campo)
+        registro[nombre_campo] = valor
+
+    identificador = registro.get(key)
+
+    if tipo == "aviso":
+        objeto = registro.get("OBJETO")
+
+        if objeto:
+            identificador = str(objeto).strip().lstrip("0")
+
+    if not identificador:
+        return registro
+
+    if identificador not in datos[nombre_diccionario]:
+        datos[nombre_diccionario][identificador] = deepcopy(plantilla)
+
+    registro_guardado = datos[nombre_diccionario][identificador]
+
+    if tipo == "aviso":
+        agregar_texto_aviso(
+            registro_guardado,
+            registro.get("TEXTO")
+    )
+
+    campos_operacion = set(operaciones.values())
+
+    datos_cabecera = {}
+    datos_operacion = {}
+
+    for campo,valor in registro.items():
+
+        if campo in campos_operacion:
+            datos_operacion[campo] = valor
+
+        elif campo in registro_guardado:
+            datos_cabecera[campo] = valor
+
+    registro_guardado.update(datos_cabecera)
+
+    numero_operacion = datos_operacion.get("Operacion")
+
+    if numero_operacion:
+        operacion_existente = registro_guardado["operaciones"].setdefault(
+            numero_operacion,
+            {}
+    )
+        operacion_existente.update(datos_operacion)
+
+    return registro_guardado
+
+def agregar_texto_aviso(aviso, texto):
+    if texto:
+        aviso.setdefault("Texto", []).append(texto)
+
+
+def __debug_data_iw(session, fila=None):
+    grid = get_grid(session)
+
+    if fila is not None:
+        grid.CurrentCellRow = fila
+
+    actualRow = grid.CurrentCellRow
+
+    for i in range(grid.ColumnCount):
+        clave = grid.ColumnOrder[i]
+
+        try:
+            valor = grid.GetCellValue(actualRow,clave)
+        except Exception as error:
+            print(f"{clave}: no disponible({error})")
+            continue
+
+        print(f"{clave}: {valor}")
+    input("\nPresiona ENTER para volver al menú...")
+
 # IW38 TOOLS
 
 def get_grid(session):
@@ -36,6 +173,11 @@ def selectCell(session, fila):
     grid = get_grid(session)
     grid.CurrentCellRow = fila
     grid.SetCurrentCell(fila, "KTEXT")
+    return grid
+
+def selectRow(session,row):
+    grid = get_grid(session)
+    grid.CurrentCellRow = row
     return grid
 
 def get_data_acta(session,ktext,dato):

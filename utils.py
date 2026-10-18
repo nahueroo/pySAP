@@ -5,9 +5,12 @@ import os
 import csv
 from sap_connection import *
 from getters import *
-from globales import datos
+from globales import *
 
 def ingreso_a_came(session,fila=None)->str:
+
+    datos = get_data_came(session,fila)
+    print(datos)
     
     if fila is not None:
         came = selectCell(session,fila)
@@ -20,7 +23,7 @@ def ingreso_a_came(session,fila=None)->str:
     datos["Clase de actividad"] = get_claseActividad(session)
     datos["Ubicacion Tecnica"] = get_UT(session)
 
-    return came
+    return came,datos
 
 def ver_fotos_en_came(session,carpeta_destino,sufijo):
 
@@ -98,6 +101,35 @@ def cgi(session):
     session.findById(DATOSCABECERA).select()
     session.findById(GRUPOPLANIFICACION).text = "Cgi"
     session.findById(GUARDAR).press()
+
+def cargar_lectura(tipo):
+    nombres_archivo = {
+        "came": "cames.json",
+        "care": "cares.json",
+        "aviso": "avisos.json",
+    }
+
+    nombre_archivo = nombres_archivo[tipo]
+
+    try:
+        with open(nombre_archivo, "r", encoding="utf-8") as archivo:
+            datos[tipo] = json.load(archivo)
+
+    except FileNotFoundError:
+        datos[tipo] = {}
+
+        # Crea el archivo aunque todavía no tenga registros
+        guardar_lectura(tipo)
+
+def guardar_lectura(tipo):
+    nombres_archivo = {
+        "came": "cames.json",
+        "care": "cares.json",
+        "aviso": "avisos.json",
+    }
+
+    with open(nombres_archivo[tipo], "w", encoding="utf-8") as archivo:
+        json.dump(datos[tipo], archivo, ensure_ascii=False, indent=4)
 
 def mostrar_datos(carpeta_acta=None):
     # Guardar los datos actuales antes de mostrarlos
