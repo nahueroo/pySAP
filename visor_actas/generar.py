@@ -1323,6 +1323,32 @@ def tiene_items_problematicos(orden: dict) -> bool:
     return False
 
 
+def detalles_items_problematicos(orden: dict) -> list[str]:
+    operaciones = orden.get("operaciones", {})
+    if not isinstance(operaciones, dict):
+        return []
+    detalles = []
+    for operacion in operaciones.values():
+        if not isinstance(operacion, dict):
+            continue
+        item = codigo_item(item_preciario(operacion.get("Clave de control", "")))
+        profundidad = numero_decimal(
+            campo_operacion(operacion, "Profundidad")
+        )
+        if item == "10.2" and profundidad is not None and profundidad > 0.15:
+            detalles.append(
+                f"El ítem 10.2 tiene profundidad {mostrar_numero(profundidad)}, "
+                "mayor al máximo permitido de 0.15."
+            )
+        ancho = numero_decimal(campo_operacion(operacion, "Ancho"))
+        if ancho is not None and ancho > 7.5:
+            detalles.append(
+                f"El ítem {item or 'sin código'} tiene ancho "
+                f"{mostrar_numero(ancho)}, mayor al máximo permitido de 7.5."
+            )
+    return detalles
+
+
 def tiene_items_7_fuera_de_g11(orden: dict, clase: str) -> bool:
     if normalizar(clase) == "g11":
         return False
@@ -3429,6 +3455,7 @@ def generar_html(
                 else materialidad_requerida
             )
         ]
+        detalles_items = detalles_items_problematicos(came)
         detalles_checks = {
             "clase": " · ".join(
                 detalle for detalle, aplica in (
@@ -3513,17 +3540,12 @@ def generar_html(
             ),
             "items_problematicos": (
                 " · ".join(
-                    detalle for detalle, aplica in (
-                        (
-                            "Hay ítems incompatibles entre sí.",
-                            tiene_items_problematicos(came),
-                        ),
-                        (
-                            "Hay ítems con ancho mayor a 7.5.",
-                            tiene_ancho_por_encima_del_umbral(came, 7.5),
-                        ),
-                    )
-                    if aplica
+                    detalle for detalle in [
+                        "Hay ítems incompatibles entre sí."
+                        if tiene_items_problematicos(came)
+                        else "",
+                        *detalles_items,
+                    ] if detalle
                 )
                 if errores["items_problematicos"]
                 else "No hay ítems incompatibles."
