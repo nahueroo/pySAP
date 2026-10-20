@@ -47,10 +47,10 @@ def get_data_came(session, fila=None):
 
     # CHEQUEA SI LA CAME ES VALIDA Y EXISTE
     if orden:
-        if orden not in datos["cames"]:
-            datos["cames"][orden] = deepcopy(came)
+        if orden not in datos["came"]:
+            datos["came"][orden] = deepcopy(came)
 
-    datos["cames"][orden].update(datos_came)
+    datos["came"][orden].update(datos_came)
 
     return datos_came
 
@@ -230,10 +230,10 @@ def select_row(session,row):
     session.findById("wnd[1]/usr/tblSAPLSWUGOBJECT_CONTROL").getAbsoluteRow(row).selected = True
     session.findById("wnd[1]").sendVKey(0) # enter
 
-def verfotosCARE(session,row,tecla):
-    if row == 0:
+def verfotosCARE(session,row,aviso,tecla):
+    if row == 0 or aviso:
         session.findById("wnd[0]/shellcont/shell").pressButton(tecla)
-    if row == 1:
+    if row == 1 and not aviso:
         session.findById("wnd[0]/shellcont[1]/shell").pressButton(tecla)
 
 def get_aviso_field(session):

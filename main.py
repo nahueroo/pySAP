@@ -35,7 +35,7 @@ def main():
             mostrar_ultimo_guardado()
             input("\nPresiona ENTER para continuar...")
         elif opcion == "3":
-                principal("descargafotos",0)     
+                principal("descargarfotos",0)     
         elif opcion == "4":
                 principal("dh",0)
         elif opcion == "5":

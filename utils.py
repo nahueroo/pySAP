@@ -10,7 +10,6 @@ from globales import *
 def ingreso_a_came(session,fila=None)->str:
 
     datos = get_data_came(session,fila)
-    print(datos)
     
     if fila is not None:
         came = selectCell(session,fila)
@@ -25,8 +24,14 @@ def ingreso_a_came(session,fila=None)->str:
 
     return came,datos
 
-def ver_fotos_en_came(session,carpeta_destino,sufijo):
+def ver_fotos_en_came(session,carpeta_destino,sufijo,numero_came):
 
+    with open("cames.json", "r", encoding="utf-8") as archivo:
+        cames = json.load(archivo)
+    came = cames.get(str(numero_came).strip())
+    if came.get("Tiene foto") != "G-Anexo SAP":
+        return
+    
     # "DOC_LIST" O "VIEW_IMAG"
     
     get_came_toolbox(session)
@@ -45,11 +50,21 @@ def entrar_a_care(session):
     
     sendKey(session, F2)
 
-def ver_fotos_en_care(session,carpeta_destino,sufijo):
+def ver_fotos_en_care(session,carpeta_destino,sufijo,numero_care):
 
+    aviso = False
+
+    with open("cares.json", "r", encoding="utf-8") as archivo:
+        cares = json.load(archivo)
+
+    care = cares.get(str(numero_care).strip())
+
+    row = 0 if care.get("Tiene foto") == "G-Anexo SAP" else 1
     # row == 0 es orden, row == 1 es aviso
 
-    row = 0
+    if row == 1:
+        aviso = True    
+
     while row < 2:
 
         if row == 0:
@@ -60,11 +75,11 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo):
         get_care_toolbox(session)
         select_row(session,row)
     
-        verfotosCARE(session,row,"VIEW_IMAG")
+        verfotosCARE(session,row,aviso,"VIEW_IMAG")
         time.sleep(0.3)
         download_fotos(session,carpeta_destino,sufijo)
 
-        verfotosCARE(session,row,"DOC_LIST")
+        verfotosCARE(session,row,aviso,"DOC_LIST")
         time.sleep(0.3)
         download_fotos(session,carpeta_destino,sufijo)
 
