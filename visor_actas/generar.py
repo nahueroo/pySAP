@@ -1120,6 +1120,98 @@ def separadores_decimales_operacion_validos(operacion: dict) -> bool:
     return separador_decimal_valido(profundidad, es_m2)
 
 
+def detalles_separadores_decimales(orden: dict) -> list[str]:
+    operaciones = orden.get("operaciones", {})
+    if not isinstance(operaciones, dict):
+        return []
+    detalles = []
+    for numero, operacion in operaciones.items():
+        if not isinstance(operacion, dict):
+            continue
+        unidad = normalizar(campo_operacion(
+            operacion,
+            "Unidad de Medida",
+            "Unidad de medida",
+            "Unidad medida",
+            "Unidad",
+        ))
+        campos = (
+            ("Duración normal", "Duracion normal", True),
+            ("Trabajo", "Trabajo", False),
+            ("Largo", "Largo", False),
+            ("Longitud", "Longitud", False),
+            ("Ancho", "Ancho", False),
+            ("Profundidad", "Profundidad", unidad == "m2"),
+        )
+        for etiqueta, nombre, requiere_coma in campos:
+            valor = campo_operacion(operacion, nombre)
+            if not separador_decimal_valido(valor, requiere_coma):
+                detalles.append(
+                    f"Operación {numero}, {etiqueta}: "
+                    f"separador decimal incorrecto ({texto(valor, '')})."
+                )
+    return detalles
+
+
+def superficie_operacion(operacion: dict) -> float | None:
+    largo = numero_decimal(campo_operacion(operacion, "Largo", "Longitud"))
+    ancho = numero_decimal(campo_operacion(operacion, "Ancho"))
+    if largo is None or ancho is None:
+        return None
+    return largo * ancho
+
+
+def tiene_duracion_igual_a_superficie(orden: dict) -> bool:
+    operaciones = orden.get("operaciones", {})
+    if not isinstance(operaciones, dict):
+        return False
+    return any(
+        isinstance(operacion, dict)
+        and normalizar(campo_operacion(
+            operacion,
+            "Unidad de Medida",
+            "Unidad de medida",
+            "Unidad medida",
+            "Unidad",
+        )) in {"m3", "ton"}
+        and (superficie := superficie_operacion(operacion)) is not None
+        and (duracion := numero_decimal(
+            operacion.get("Duracion normal")
+        )) is not None
+        and abs(duracion - superficie) <= 0.01
+        for operacion in operaciones.values()
+    )
+
+
+def tiene_6_2_incompatible_por_superficie(orden: dict) -> bool:
+    operaciones = orden.get("operaciones", {})
+    if not isinstance(operaciones, dict):
+        return False
+    superficies_62 = [
+        superficie_operacion(operacion)
+        for operacion in operaciones.values()
+        if isinstance(operacion, dict)
+        and codigo_item(item_preciario(
+            operacion.get("Clave de control", "")
+        )) == "6.2"
+    ]
+    superficies_33 = [
+        superficie_operacion(operacion)
+        for operacion in operaciones.values()
+        if isinstance(operacion, dict)
+        and codigo_item(item_preciario(
+            operacion.get("Clave de control", "")
+        )) in {"3.3.1", "3.3.2"}
+    ]
+    return any(
+        superficie_62 is not None
+        and superficie_33 is not None
+        and abs(superficie_62 - superficie_33) <= 0.01
+        for superficie_62 in superficies_62
+        for superficie_33 in superficies_33
+    )
+
+
 def cantidad_operacion(
     largo: object,
     ancho: object,
@@ -1138,10 +1230,10 @@ def cantidad_operacion(
         if profundidad_numero is None:
             return None
         return largo_numero * ancho_numero * profundidad_numero
-    if unidad_normalizada in {"toneladas", "ton", "tn"}:
+    if unidad_normalizada in {"t", "toneladas", "ton", "tn"}:
         if profundidad_numero is None:
             return None
-        return largo_numero * ancho_numero * profundidad_numero * 0.24
+        return largo_numero * ancho_numero * profundidad_numero * 2.4
     return None
 
 
@@ -1383,8 +1475,11 @@ def tiene_items_problematicos(orden: dict) -> bool:
         profundidad = numero_decimal(
             campo_operacion(operacion, "Profundidad")
         )
-        if (profundidad or 0) > 0.20:
+        if (profundidad or 0) >= 0.20:
             return True
+
+    if tiene_6_2_incompatible_por_superficie(orden):
+        return True
 
     for item in {"6.1.1", "6.1.2", "6.2", "6.3"}:
         for operacion in operaciones_por_item.get(item, []):
@@ -1409,10 +1504,10 @@ def detalles_items_problematicos(orden: dict) -> list[str]:
         profundidad = numero_decimal(
             campo_operacion(operacion, "Profundidad")
         )
-        if item == "10.2" and profundidad is not None and profundidad > 0.20:
+        if item == "10.2" and profundidad is not None and profundidad >= 0.20:
             detalles.append(
                 f"El ítem 10.2 tiene profundidad {mostrar_numero(profundidad)}, "
-                "mayor al máximo permitido de 0.20."
+                "igual o mayor al máximo permitido de 0.20."
             )
         ancho = numero_decimal(campo_operacion(operacion, "Ancho"))
         if ancho is not None and ancho > 9:
@@ -1420,6 +1515,10 @@ def detalles_items_problematicos(orden: dict) -> list[str]:
                 f"El ítem {item or 'sin código'} tiene ancho "
                 f"{mostrar_numero(ancho)}, mayor al máximo permitido de 9."
             )
+    if tiene_6_2_incompatible_por_superficie(orden):
+        detalles.append(
+            "El ítem 6.2 tiene la misma superficie que 3.3.1 o 3.3.2."
+        )
     return detalles
 
 
@@ -1550,15 +1649,34 @@ def tiene_largo_mayor_que_cuadra(
     )
 
 
+def tiene_superficie_minima_de_cuadra(
+    orden: dict,
+    largo_cuadra: object,
+) -> bool:
+    largo = numero_decimal(largo_cuadra)
+    if largo is None:
+        return False
+    limite = largo * 8.5 * 0.5
+    operaciones = orden.get("operaciones", {})
+    if not isinstance(operaciones, dict):
+        return False
+    return any(
+        isinstance(operacion, dict)
+        and (superficie := superficie_operacion(operacion)) is not None
+        and superficie >= limite
+        for operacion in operaciones.values()
+    )
+
+
 ERROR_TIPOS = (
     ("acta", "Número de acta faltante"),
     ("clase", "Clase de Actividad"),
-    ("servicio", "Servicio G02"),
+    ("servicio", "Servicio G02/G17"),
     ("fecha", "Fecha creación invalida"),
     ("fecha_formato", "Fecha inicio/fin fuera de período"),
     ("fechas_iguales", "Fechas inicio/fin no uniformes"),
     ("texto_correlativo", "Textos breves no correlativos"),
-    ("separadores_decimales", "Separadores decimales incorrectos"),
+    ("errores_carga_automaticos", "Errores de carga automáticos"),
     ("foto", "Fotos existentes"),
     ("duracion", "Valores en 0"),
     ("montos", "Monto estimado no coincidente"),
@@ -1946,6 +2064,7 @@ def mostrar_operaciones(
                 data-profundidad="{esc(profundidad, '')}"
                 data-unidad="{esc(unidad, '')}"
                 data-item="{esc(item or texto_breve, '')}"
+                data-item-codigo="{esc(codigo_item(item), '')}"
                 data-cantidad="{esc(mostrar_numero(cantidad), '')}"
                 data-precio="{esc(mostrar_numero(precio_unitario), '')}"
                 data-monto-sap="{esc(mostrar_numero(monto_duracion), '')}"
@@ -1997,7 +2116,7 @@ def mostrar_operaciones(
                         </button></th>
                         {(
                             '<th class="columna-importante">Duración normal</th><th>Superficie</th><th>Largo</th><th>Ancho</th><th>Profundidad</th><th>Unidad</th><th>Cálculo</th><th>Coincide duración</th><th>Precio unitario</th><th>Monto SAP</th>'
-                            + ('<th>Monto estimado</th>' if mostrar_monto_estimado else '')
+                            + ('<th>Monto real</th>' if mostrar_monto_estimado else '')
                             + '<th>Comparar ítem</th><th>Total comparado</th><th>Diferencia</th>'
                             if es_came
                             else '<th>Ítem</th><th>Trabajo</th><th>Precio unitario</th><th>Monto estimado</th>'
@@ -2009,13 +2128,15 @@ def mostrar_operaciones(
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="{2 if es_came else 3}">Totales visibles</th>
                         {(
-                            '<th class="total-duracion">0</th><th class="totales-items-visibles" colspan="7"></th><th class="total-monto-sap">-</th>'
-                            + ('<th class="total-monto-estimado">-</th>' if mostrar_monto_estimado else '')
-                            + '<th colspan="3"></th>'
+                            f'<th class="totales-resumen" colspan="{17 if mostrar_monto_estimado else 16}">'
+                            '<span>Totales: </span><span class="totales-items-visibles"></span>'
+                            ' <span class="separador-total">\t</span>'
+                            '<span>Sup: </span><span class="total-superficie">0</span><span>m2</span>'
+                            ' <span class="separador-total">\t</span>'
+                            '<span>Precio: </span><span class="total-monto-sap">-</span></th>'
                             if es_came
-                            else '<th></th><th class="total-trabajo">0</th><th></th><th class="total-monto-estimado">-</th>'
+                            else '<th colspan="3">Totales</th><th></th><th class="total-trabajo">0</th><th></th><th class="total-monto-estimado">-</th>'
                         )}
                     </tr>
                 </tfoot>
@@ -2540,11 +2661,11 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
         {fila["acta"] for fila in filas_con_error if fila["acta"]},
         key=str.lower,
     )
-    opciones_observaciones = sorted(
+    opciones_detalle = sorted(
         {
-            fila["observaciones"]
+            fila.get("detalle", fila["observaciones"])
             for fila in filas_con_error
-            if fila["observaciones"]
+            if fila.get("detalle", fila["observaciones"])
         },
         key=str.lower,
     )
@@ -2568,13 +2689,16 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                     fila.get('detalles_checks', '{}'), ''
                 )}"
                 data-observaciones-base="{esc(
-                    fila.get('observaciones_base', fila['observaciones']), ''
+                    fila.get('detalle', fila['observaciones']), ''
                 )}">
                 <td>{esc(fila['came'])}</td>
                 <td>{esc(fila['acta'])}</td>
                 <td class="celda-tipo-error">{esc(fila['tipos'], '')}</td>
+                <td class="celda-detalle">{esc(
+                    fila.get('detalle', fila['observaciones']), ''
+                )}</td>
                 <td class="celda-observaciones" contenteditable="true"
-                    data-observaciones="{esc(fila['observaciones'], '')}">{esc(fila['observaciones'])}</td>
+                    data-observaciones="{esc(fila.get('observaciones', ''), '')}">{esc(fila.get('observaciones', ''), '')}</td>
             </tr>
         """
         for fila in filas
@@ -2649,8 +2773,10 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                             {selector_filtro("acta", opciones_acta)}</th>
                         <th><button data-columna="tipos" type="button">Tipo de error ↕</button>
                             {selector_filtro("tipos", opciones_error)}</th>
+                        <th><button data-columna="detalle" type="button">Detalle ↕</button>
+                            {selector_filtro("detalle", opciones_detalle)}</th>
                         <th><button data-columna="observaciones" type="button">Observaciones ↕</button>
-                            {selector_filtro("observaciones", opciones_observaciones)}</th>
+                            {selector_filtro("observaciones", [])}</th>
                     </tr></thead>
                     <tbody>{filas_html}</tbody>
                 </table>
@@ -2696,6 +2822,21 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
             const came = fila.dataset.came;
             if (Object.prototype.hasOwnProperty.call(observacionesGuardadas, came)) {{
                 observacion.textContent = observacionesGuardadas[came];
+                if (
+                    observacionesGuardadas[came].trim()
+                    && observacionesGuardadas[came].trim()
+                        === (fila.dataset.observacionesBase || "").trim()
+                ) {{
+                    delete observacionesGuardadas[came];
+                    observacion.textContent = "";
+                }}
+                if (
+                    /^(Carga|Fotos|Acta) (incorrecto|pendiente)(:.*)?\\.?$/i
+                        .test(observacionesGuardadas[came].trim())
+                ) {{
+                    delete observacionesGuardadas[came];
+                    observacion.textContent = "";
+                }}
             }}
             observacion.addEventListener("input", () => {{
                 observacionesGuardadas[came] = observacion.textContent.trim();
@@ -2709,13 +2850,22 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                 }}
             }});
         }});
+        try {{
+            localStorage.setItem(
+                claveObservaciones,
+                JSON.stringify(observacionesGuardadas),
+            );
+        }} catch (error) {{
+            console.warn("No se pudieron migrar las observaciones.", error);
+        }}
 
         function valorColumna(fila, columna) {{
             const indice = {{
                 came: 0,
                 acta: 1,
                 tipos: 2,
-                observaciones: 3,
+                detalle: 3,
+                observaciones: 4,
             }}[columna];
             return fila.cells[indice]?.textContent.trim() || "";
         }}
@@ -2776,13 +2926,10 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                 const estado = checks[came]?.[clave] || "pendiente";
                 if (estado !== "correcto") {{
                     const motivo = checks[came]?.[claveMotivo];
-                    valores.push(
-                        `${{etiqueta}} ${{estado}}`
-                        + (motivo ? `: ${{motivo}}.` : "."),
-                    );
+                    if (motivo) valores.push(`${{motivo}}.`);
                 }}
             }});
-            fila.querySelector(".celda-observaciones").textContent =
+            fila.querySelector(".celda-detalle").textContent =
                 valores.join(" ") || "-";
         }}
 
@@ -2803,7 +2950,7 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                 items_problematicos: "Sin items incompatibles",
                 ut: "UT valida",
                 montos: "Monto estimado coincidente",
-                separadores_decimales: "Separadores decimales correctos",
+                errores_carga_automaticos: "Errores de carga automáticos",
                 duracion: "Sin valores en 0",
                 materialidad: "Materialidad",
                 correspondencia: "Correspondencia de ítems",
@@ -2834,17 +2981,14 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                 ) {{
                     tipos.push(etiqueta);
                     const motivo = checks[came]?.[claveMotivo];
-                    valores.push(
-                        `${{etiqueta}} ${{estado || "pendiente"}}`
-                        + (motivo ? `: ${{motivo}}.` : "."),
-                    );
+                    if (motivo) valores.push(`${{motivo}}.`);
                 }}
             }});
             const tipo = fila.querySelector(".celda-tipo-error");
             tipo.textContent = tipos.join(", ");
-            const observacion = fila.querySelector(".celda-observaciones");
             if (!observacionesGuardadas[came]?.trim()) {{
-                observacion.textContent = valores.join(" ") || "-";
+                fila.querySelector(".celda-detalle").textContent =
+                    valores.join(" ") || "-";
             }}
         }}
 
@@ -2888,7 +3032,7 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                 }}
                 [
                     "fecha", "foto", "items_problematicos", "ut", "montos",
-                    "separadores_decimales", "duracion", "materialidad",
+                    "errores_carga_automaticos", "duracion", "materialidad",
                     "correspondencia", "direccion", "largo_cuadra",
                 ].forEach((clave) => {{
                     if (checksCame[clave] === true) checksSuperados.push(clave);
@@ -2924,6 +3068,7 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                 "CAME",
                 "Número de acta",
                 "Tipo de error",
+                "Detalle",
                 "Observaciones",
             ];
             const escaparCsv = (valor) =>
@@ -2935,6 +3080,7 @@ def generar_reporte_errores(filas: list[dict[str, str]]) -> str:
                 fila.cells[0]?.textContent.trim() || "",
                 fila.cells[1]?.textContent.trim() || "",
                 fila.querySelector(".celda-tipo-error")?.textContent.trim() || "",
+                fila.querySelector(".celda-detalle")?.textContent.trim() || "",
                 fila.querySelector(".celda-observaciones")?.textContent.trim() || "",
             ]);
             const archivo = [
@@ -3339,6 +3485,7 @@ def generar_html(
         largo_m = datos_ubicacion.get("largo_m")
         clase_came = valor_real(came.get("Clase de actividad"))
         clase_care = valor_real(care.get("Clase de actividad"))
+        clase_came_normalizada = normalizar(clase_came)
         clases_iguales = bool(
             clase_came and clase_care and clase_came == clase_care
         )
@@ -3349,8 +3496,8 @@ def generar_html(
             and servicio_normalizado not in {"", "none", "-"}
             and not servicio_normalizado.startswith("número de documento")
         )
-        servicio_g02_ok = (
-            clase_came.lower() != "g02"
+        servicio_clase_ok = (
+            clase_came_normalizada not in {"g02", "g17"}
             or bool(servicio_valido)
         )
         servicio_visible = re.sub(
@@ -3383,7 +3530,6 @@ def generar_html(
         )
         came_tiene_foto = tiene_foto(came)
         tiene_duracion_cero = tiene_duracion_normal_cero(came)
-        clase_came_normalizada = normalizar(clase_came)
         duracion_g13 = (
             clase_came_normalizada == "g13"
             and tiene_duracion_por_debajo_del_umbral(came, 12)
@@ -3437,11 +3583,18 @@ def generar_html(
             == direccion_normalizada_para_comparar(direccion_referencia)
         )
         largo_excede_cuadra = tiene_largo_mayor_que_cuadra(came, largo_m)
-        servicio_sin_g02 = bool(servicio_valido) and clase_came_normalizada != "g02"
+        servicio_sin_clase_compatible = (
+            bool(servicio_valido)
+            and clase_came_normalizada not in {"g02", "g17"}
+        )
         materialidad_normalizada = normalizar(materialidad_care)
         if materialidad_normalizada in {"adoquin", "adoquines"}:
             materialidad_normalizada = "adoquin"
         superficie_m2 = total_superficie_m2(came)
+        superficie_minima_cuadra = tiene_superficie_minima_de_cuadra(
+            came,
+            largo_m,
+        )
         reglas_clase_ok = (
             not (
                 clase_came_normalizada == "g13"
@@ -3463,13 +3616,26 @@ def generar_html(
             )
             and not (
                 clase_came_normalizada in {"g04", "g09"}
-                and superficie_m2 <= 400
+                and (
+                    (
+                        largo_m is not None
+                        and not superficie_minima_cuadra
+                    )
+                    or (
+                        largo_m is None
+                        and superficie_m2 <= 400
+                    )
+                )
+            )
+            and not (
+                superficie_minima_cuadra
+                and clase_came_normalizada not in {"g04", "g09"}
             )
         )
         clase_actividad_ok = (
             clases_iguales
-            and servicio_g02_ok
-            and not servicio_sin_g02
+            and servicio_clase_ok
+            and not servicio_sin_clase_compatible
             and not duracion_g13
             and not ancho_g13
             and not duracion_g05
@@ -3511,14 +3677,17 @@ def generar_html(
         errores = {
             "acta": not numero_acta_came,
             "clase": not clase_actividad_ok,
-            "servicio": not servicio_g02_ok,
+            "servicio": not servicio_clase_ok,
             "fecha": not fechas_came_ok,
             "fecha_formato": not fecha_periodo_valida,
             "fechas_iguales": (
                 fechas_inicio_no_uniformes or fechas_fin_no_uniformes
             ),
             "texto_correlativo": not texto_breve_correlativo,
-            "separadores_decimales": not separadores_decimales_ok,
+            "errores_carga_automaticos": (
+                not separadores_decimales_ok
+                or tiene_duracion_igual_a_superficie(came)
+            ),
             "foto": not came_tiene_foto,
             "duracion": tiene_duracion_cero,
             "montos": montos_no_coinciden,
@@ -3554,8 +3723,8 @@ def generar_html(
             ("ut", "UT valida", not errores["ut"]),
             ("montos", "Monto estimado coincidente",
              not errores["montos"]),
-            ("separadores_decimales", "Separadores decimales correctos",
-             not errores["separadores_decimales"]),
+            ("errores_carga_automaticos", "Errores de carga automáticos",
+             not errores["errores_carga_automaticos"]),
             ("duracion", "Sin valores en 0", not errores["duracion"]),
             ("materialidad", "Materialidad", not errores["materialidad"]),
             ("correspondencia", "Correspondencia de ítems",
@@ -3597,12 +3766,12 @@ def generar_html(
                         not clases_iguales,
                     ),
                     (
-                        "G02 no tiene servicio asociado.",
-                        not servicio_g02_ok,
+                        "G02/G17 no tiene servicio asociado.",
+                        not servicio_clase_ok,
                     ),
                     (
-                        "Hay servicio asociado sin clase G02.",
-                        servicio_sin_g02,
+                        "Hay servicio asociado sin clase G02 o G17.",
+                        servicio_sin_clase_compatible,
                     ),
                     (
                         "G13 tiene una duración normal que no supera 12.",
@@ -3652,9 +3821,25 @@ def generar_html(
                         and superficie_m2 <= 100,
                     ),
                     (
-                        f"{clase_came} requiere una superficie mayor a 400 m2.",
+                        f"{clase_came} requiere al menos un ítem con "
+                        "superficie >= 50% del largo de cuadra por 8.5 m.",
                         clase_came_normalizada in {"g04", "g09"}
-                        and superficie_m2 <= 400,
+                        and (
+                            (
+                                largo_m is not None
+                                and not superficie_minima_cuadra
+                            )
+                            or (
+                                largo_m is None
+                                and superficie_m2 <= 400
+                            )
+                        ),
+                    ),
+                    (
+                        "Hay un ítem con superficie suficiente para G04/G09, "
+                        f"pero la clase es {clase_came}.",
+                        superficie_minima_cuadra
+                        and clase_came_normalizada not in {"g04", "g09"},
                     ),
                 )
                 if aplica
@@ -3697,11 +3882,19 @@ def generar_html(
                 "El monto estimado no coincide con el monto calculado."
                 if errores["montos"] else "El monto estimado coincide."
             ),
-            "separadores_decimales": (
-                "Los separadores decimales no respetan el formato requerido."
-                if errores["separadores_decimales"]
-                else "Los separadores decimales son correctos."
-            ),
+            "errores_carga_automaticos": " · ".join(
+                [
+                    *detalles_separadores_decimales(came),
+                    *(
+                        [
+                            "Hay operaciones en m3 o ton cuya duración "
+                            "normal coincide con la superficie."
+                        ]
+                        if tiene_duracion_igual_a_superficie(came)
+                        else []
+                    ),
+                ]
+            ) or "Los errores de carga automáticos no presentan inconsistencias.",
             "duracion": (
                 "Hay operaciones con duración normal igual a cero."
                 if errores["duracion"] else "No hay valores en cero."
@@ -3777,6 +3970,8 @@ def generar_html(
                             <option>Falta foto terminado</option>
                             <option>Subir foto de la ejecucion del trabajo</option>
                             <option>El trabajo no es lo solicitado</option>
+                            <option>Faltan trabajos</option>
+                            <option>El trabajo no refleja lo cargado</option>
                         </select>
                     </label>
                     <label class="check-manual">
@@ -3817,11 +4012,7 @@ def generar_html(
             observaciones.append(
                 "La CAME contiene ítems 7.1 o 7.2 y no pertenece a G11."
             )
-        if not separadores_decimales_ok:
-            observaciones.append(
-                "Duración normal debe usar coma; los demás decimales deben usar "
-                "punto, salvo Profundidad de ítems M2, que también debe usar coma."
-            )
+        observaciones.extend(detalles_separadores_decimales(came))
         detalles_error = [
             detalles_checks[clave]
             for clave, _, correcto in checks_orden
@@ -3833,7 +4024,8 @@ def generar_html(
                 "came": came_id,
                 "acta": numero_acta_came,
                 "tipos": errores_titulo,
-                "observaciones": " ".join(observaciones),
+                "detalle": " ".join(observaciones),
+                "observaciones": "",
                 "tiene_error": "si" if tiene_errores else "no",
                 "claves": ",".join(
                     tipo for tipo, tiene_error in errores.items()
@@ -3989,7 +4181,14 @@ def generar_html(
 
             <section class="seccion">
                 <div class="titulo-seccion-con-accion">
-                    <h3>Información de la CAME</h3>
+                    <h3>Información de la CAME
+                        <span class="indicador-estado-came estado-{
+                            'con-errores' if tiene_errores else 'pendiente'
+                        }" data-estado-indicador
+                            title="Estado de la CAME">{
+                            '✕' if tiene_errores else '✕✓'
+                        }</span>
+                    </h3>
                     <button class="boton-comparar-fotos" type="button">
                         Ver fotos en pantalla completa
                     </button>
@@ -3997,6 +4196,7 @@ def generar_html(
                 {
                     f"""
                     <div class="detalle-ubicacion">
+                        <span>Acta: {esc(numero_acta_came)}</span><br>
                         <span>Barrio: {esc(datos_ubicacion.get("barrio", ""))}</span>
                         <span>Entre calles: {esc(entre_calles_texto)}</span>
                         {
@@ -4316,6 +4516,32 @@ def generar_html(
 
         .estado-correccion-resumen.estado-con-errores {{
             color: #fff1f2;
+            background: #dc2626;
+        }}
+
+        .indicador-estado-came {{
+            display: inline-flex;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            border-radius: 50%;
+            color: white;
+            font-size: 14px;
+            font-weight: 900;
+            vertical-align: middle;
+        }}
+
+        .indicador-estado-came.estado-corregida {{
+            background: #16a34a;
+        }}
+
+        .indicador-estado-came.estado-pendiente {{
+            background: #f59e0b;
+        }}
+
+        .indicador-estado-came.estado-con-errores {{
             background: #dc2626;
         }}
 
@@ -4979,10 +5205,22 @@ def generar_html(
             box-shadow: var(--sombra);
         }}
 
+        #reporte-embebido {{
+            box-sizing: border-box;
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 8px;
+        }}
+
         .modal-reporte iframe {{
             width: 100%;
             height: 100%;
             border: 0;
+        }}
+
+        .separador-total {{
+            display: inline-block;
+            width: 2em;
         }}
 
         .cerrar-reporte {{
@@ -5967,6 +6205,7 @@ def generar_html(
             }}
             modalReporte.classList.add("abierto");
             modalReporte.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
             cerrarReporte?.focus();
         }}
 
@@ -5976,6 +6215,7 @@ def generar_html(
             }}
             modalReporte.classList.remove("abierto");
             modalReporte.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
         }}
 
         abrirReporteErrores?.addEventListener("click", () => {{
@@ -6411,7 +6651,16 @@ def generar_html(
                         "estado-con-errores",
                     );
                     indicador.classList.add(configuracion.clase);
-                    indicador.textContent = configuracion.texto;
+                    if (indicador.classList.contains("indicador-estado-came")) {{
+                        indicador.textContent = estado === "corregida"
+                            ? "✓"
+                            : estado === "con-errores"
+                                ? "✕"
+                                : "✕✓";
+                        indicador.title = configuracion.texto;
+                    }} else {{
+                        indicador.textContent = configuracion.texto;
+                    }}
                 }},
             );
         }}
@@ -6944,6 +7193,10 @@ def generar_html(
                 let totalMontoSap = 0;
                 let totalMontoEstimado = 0;
                 const totalesPorItem = new Map();
+                const itemsConSuperficieTotal = new Set([
+                    "4.1.1", "4.1.2", "4.2.1", "4.2.2",
+                    "6.1.1", "6.1.2", "6.2", "6.3", "10.2",
+                ]);
 
                 cuerpo.querySelectorAll("tr").forEach((fila) => {{
                     if (fila.hidden) {{
@@ -6951,7 +7204,11 @@ def generar_html(
                     }}
                     totalDuracion += numero(fila.dataset.duracion);
                     totalTrabajo += numero(fila.dataset.trabajo);
-                    totalSuperficie += numero(fila.dataset.superficie);
+                    if (itemsConSuperficieTotal.has(
+                        fila.dataset.itemCodigo
+                    )) {{
+                        totalSuperficie += numero(fila.dataset.superficie);
+                    }}
                     totalMontoSap += numero(fila.dataset.montoSap);
                     totalMontoEstimado += numero(fila.dataset.montoEstimado);
                     const item = fila.dataset.item || "Sin ítem";
@@ -7003,13 +7260,23 @@ def generar_html(
                     ".totales-items-visibles"
                 );
                 if (totalesItemsElemento) {{
-                    totalesItemsElemento.textContent = Array.from(
-                        totalesPorItem.values()
-                    ).map((total) =>
-                        `${{total.item}} (${{total.unidad}}): ` +
-                        `${{formatoNumero(total.cantidad)}} - ` +
-                        `${{formatoNumero(total.duracion)}}`
-                    ).join(" | ");
+                    totalesItemsElemento.replaceChildren();
+                    Array.from(totalesPorItem.values()).forEach(
+                        (total, indice) => {{
+                            if (indice) {{
+                                totalesItemsElemento.append(" | ");
+                            }}
+                            const item = document.createElement("span");
+                            item.textContent = total.item;
+                            const duracion = document.createElement("strong");
+                            duracion.textContent =
+                                `: ${{formatoNumero(total.duracion)}}`;
+                            totalesItemsElemento.append(
+                                item,
+                                duracion,
+                            );
+                        }},
+                    );
                 }}
             }}
 
@@ -7086,7 +7353,7 @@ def generar_html(
                         && profundidad !== null
                     ) {{
                         cantidadComparada =
-                            largo * ancho * 0.24 * profundidad;
+                            largo * ancho * 2.4 * profundidad;
                     }}
                     const diferencia =
                         selector.value && cantidadComparada !== null
@@ -7139,12 +7406,16 @@ def generar_html(
         }});
 
         let galeriaAbiertaConF = false;
+        let overflowDocumentoAnterior = "";
 
         function abrirGaleriaFotos(tarjeta, desdeF = false) {{
             if (!tarjeta) {{
                 return;
             }}
             galeriaAbiertaConF = desdeF;
+            overflowDocumentoAnterior = document.documentElement.style.overflow;
+            document.documentElement.style.overflow = "hidden";
+            document.body.style.overflow = "hidden";
             galeriaModal.innerHTML = "";
             if (modalResumenFotos) {{
                 const materialidad = tarjeta.dataset.materialidad || "-";
@@ -7409,6 +7680,8 @@ def generar_html(
         function cerrarGaleria() {{
             modalFotos.classList.remove("abierto");
             modalFotos.setAttribute("aria-hidden", "true");
+            document.documentElement.style.overflow = overflowDocumentoAnterior;
+            document.body.style.overflow = "";
             galeriaAbiertaConF = false;
         }}
 
@@ -7491,41 +7764,51 @@ def generar_html(
             "click",
             descargarListadoCames,
         );
+        function cambiarOrden(delta, conservarScroll = false) {{
+            const posicionScroll = window.scrollY;
+            const nuevoIndice = indiceActual + delta;
+            if (
+                nuevoIndice < 0
+                || nuevoIndice >= tarjetasFiltradas.length
+            ) {{
+                return;
+            }}
+            indiceActual = nuevoIndice;
+            mostrarOrdenActual();
+            if (conservarScroll) {{
+                const restaurarScroll = () => {{
+                    window.scrollTo(0, posicionScroll);
+                }};
+                requestAnimationFrame(restaurarScroll);
+                window.setTimeout(restaurarScroll, 0);
+            }} else {{
+                window.scrollTo({{ top: 0, behavior: "smooth" }});
+            }}
+        }}
+
         botonAnterior.addEventListener("click", () => {{
             if (indiceActual > 0) {{
-                indiceActual -= 1;
-                mostrarOrdenActual();
-                window.scrollTo({{ top: 0, behavior: "smooth" }});
+                cambiarOrden(-1);
             }}
         }});
         botonSiguiente.addEventListener("click", () => {{
             if (indiceActual < tarjetasFiltradas.length - 1) {{
-                indiceActual += 1;
-                mostrarOrdenActual();
-                window.scrollTo({{ top: 0, behavior: "smooth" }});
+                cambiarOrden(1);
             }}
         }});
 
         function avanzarConBarra() {{
-            const posicionScroll = window.scrollY;
             if (botonSiguiente.disabled) {{
                 return;
             }}
-            botonSiguiente.click();
-            requestAnimationFrame(() => {{
-                window.scrollTo({{ top: posicionScroll, behavior: "instant" }});
-            }});
+            cambiarOrden(1, true);
         }}
 
         function retrocederConShiftBarra() {{
-            const posicionScroll = window.scrollY;
             if (botonAnterior.disabled) {{
                 return;
             }}
-            botonAnterior.click();
-            requestAnimationFrame(() => {{
-                window.scrollTo({{ top: posicionScroll, behavior: "instant" }});
-            }});
+            cambiarOrden(-1, true);
         }}
 
         function aplicarFiltrosOperacionesGlobales() {{

@@ -163,6 +163,9 @@ def __debug_data_iw(session, fila=None):
 def get_grid(session):
     return session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell")
 
+def get_grid2(session):
+    return session.findById("wnd[0]/usr/cntlGRID1/shellcont/shell/shellcont[1]/shell")
+
 def get_columns(session):
     grid = get_grid(session)
 
