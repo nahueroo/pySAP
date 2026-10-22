@@ -1,4 +1,3 @@
-from cerrarpestanias import cerrar_pestanas
 from utils import *
 from pausa import pausa
 from sap_connection import get_session, __debug_data_iw
@@ -54,7 +53,6 @@ def principal(modo,fila)->str:
     entrar_a_aviso(session)
     volveryGuardarOperaciones(session,"care")
     volveryGuardarOperaciones(session,"came")
-    mostrar_datos(carpeta_acta)
 
     # El final del proceso lo define el usuario con ESC o ENTER
     if modo == "corregir":

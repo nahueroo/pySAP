@@ -354,21 +354,3 @@ def mover_y_renombrar_archivos_sap(carpeta_destino, sufijo):
     except OSError as e:
         print(f"Error al mover archivos SAP: {e}")
         return False
-
-def guardar_itemizado(session,orden):
-
-    if orden == "came":
-        operaciones = getter_came(session)
-        orden = "DATOS CAME"
-        texto = "\n\nCargado:"
-    elif orden == "care":
-        operaciones = getter_care(session)
-        orden = "DATOS CARE"
-        texto = "\n\nItemizado:"
-    
-    if operaciones:
-        print(texto)
-        print(operaciones)
-        datos[orden] = operaciones
-    else:
-        datos[orden] = "No se encontraron datos válidos."
