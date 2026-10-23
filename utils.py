@@ -4,7 +4,6 @@ import json
 import os
 import csv
 from sap_connection import *
-from getters import *
 from globales import *
 
 def ingreso_a_came(session,fila=None)->str:
@@ -17,10 +16,6 @@ def ingreso_a_came(session,fila=None)->str:
         came = get_grid(session)
     
     came.doubleClickCurrentCell()
-
-    datos["Texto Breve"] = get_textoBreve(session)
-    datos["Clase de actividad"] = get_claseActividad(session)
-    datos["Ubicacion Tecnica"] = get_UT(session)
 
     return came,datos
 
@@ -44,9 +39,6 @@ def entrar_a_care(session):
     get_care_field(session)
     time.sleep(0.4)
     get_care_field(session)
-    
-    datos["Ubicacion Aviso"] = get_textoBreveCare(session)
-    datos["Clase de actividad aviso"] =  get_claseActividad(session)
     
     sendKey(session, F2)
 
@@ -86,34 +78,6 @@ def ver_fotos_en_care(session,carpeta_destino,sufijo,numero_care):
         row += 1
 
     cerrar_ventanas_extra(session)
-
-def entrar_a_aviso(session):
-    
-    get_aviso_field(session)
-    time.sleep(0.3)
-    
-    datos["Tipo Aviso"] = get_aviso_tipo(session)
-    datos["Autor Aviso"] = get_aviso_autor(session)
-    datos["Fecha Aviso"] = get_aviso_fecha(session)
-    datos["Servicio"] = get_aviso_servicio(session)
-        
-    # Obtener texto largo del aviso en una sola línea
-    texto_largo = get_texto_aviso(session)
-    if texto_largo:
-        # Convertir saltos de línea a espacios para que quede en una sola línea
-        datos["Aviso"] = texto_largo.replace('\n', ' ').replace('\r', ' ')
-    else:
-        datos["Aviso"] = "Sin texto disponible"
-
-def volveryGuardarOperaciones(session,orden):
-    
-    volver(session)
-    selectOperTab(session)
-
-def cgi(session):
-    session.findById(DATOSCABECERA).select()
-    session.findById(GRUPOPLANIFICACION).text = "Cgi"
-    session.findById(GUARDAR).press()
 
 def cargar_lectura(tipo):
     nombres_archivo = {

@@ -1,10 +1,9 @@
 from utils import *
-from pausa import pausa
 from sap_connection import get_session, __debug_data_iw
 import json
 
 
-def principal(modo,fila)->str:
+def principal(fila=0,modo=None)->str:
     
     session = get_session()
     if session is None:
@@ -16,10 +15,7 @@ def principal(modo,fila)->str:
     if fila >= ultimaFila:
         return
 
-    if modo == "corregir":
-        _, datos = ingreso_a_came(session)
-    else:
-        _, datos = ingreso_a_came(session,fila)
+    _, datos = ingreso_a_came(session,fila)
 
     numero_came = str(datos["Orden"]).strip()
 
@@ -37,39 +33,22 @@ def principal(modo,fila)->str:
         return
 
     ver_fotos_en_came(session,carpeta_acta, "CAME",numero_came)
-    if modo == "dh":
+    if modo == "solofotos":
         volver(session)
         fila += 1
-        return principal(modo,fila)
+        return principal(fila,modo)
     
     entrar_a_care(session)
     ver_fotos_en_care(session,carpeta_acta, "CARE",numero_care)
-    if modo == "descargarfotos":
-        volver(session)
-        volver(session)
-        fila += 1
-        return principal(modo,fila)
-
-    entrar_a_aviso(session)
-    volveryGuardarOperaciones(session,"care")
-    volveryGuardarOperaciones(session,"came")
-
-    # El final del proceso lo define el usuario con ESC o ENTER
-    if modo == "corregir":
-        exit_code = pausa()
-        if exit_code == CONTINUE:  # ESC
-            cgi(session)
-
-    #cerrar_pestanas()
-    time.sleep(0.3)
+    volver(session)
     volver(session)
 
     time.sleep(0.3)
     fila+=1
 
     time.sleep(0.6)
-    if fila < ultimaFila and (modo == "descarga" or modo == "dh"):
-        return principal(modo,fila)
+    if fila < ultimaFila:
+        return principal(fila,modo)
     else:
         return
 

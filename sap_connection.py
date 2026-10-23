@@ -1,7 +1,6 @@
 import win32com.client
 import shutil
 from constantes import *
-from getters import *
 from globales import *
 from copy import deepcopy
 import re

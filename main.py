@@ -1,5 +1,5 @@
 from scripts import principal,debug,getter
-from utils import mostrar_ultimo_guardado, guardar_lectura,cargar_lectura
+from utils import guardar_lectura,cargar_lectura
 from pausa import limpiar_consola, traer_consola_al_frente
 from vincular import vincular
 import os
@@ -7,13 +7,11 @@ import os
 def mostrar_menu():
 
     print("\n---MENU ---\b\b")
-    print("1. Corregir un acta")
-    print("2. Mostrar ultima guardada")
-    print("3. Bajar fotos de todas las cames")
-    print("4. Correccion DH")
-    print("5. Obtener toda la grilla")
-    print("6. Vincular")
-    print("7. Salir")
+    print("1. Bajar fotos de todas las cames y cares")
+    print("2. Solo cames (DH)")
+    print("3. Obtener toda la grilla")
+    print("4. Vincular")
+    print("5. Salir")
 
 def mostrar_debug_menu():
     print("\n---MENU DEBUG---\b\b")
@@ -30,15 +28,10 @@ def main():
         opcion = input("Opcion?\n")
 
         if opcion == "1":
-            principal("corregir",0)
+                principal()     
         elif opcion == "2":
-            mostrar_ultimo_guardado()
-            input("\nPresiona ENTER para continuar...")
+                principal(0,"solofotos")
         elif opcion == "3":
-                principal("descargarfotos",0)     
-        elif opcion == "4":
-                principal("dh",0)
-        elif opcion == "5":
                 modo = input("\n1: cames, 2: cares, 3:avisos")
 
                 tipos = {
@@ -53,16 +46,16 @@ def main():
                     guardar_lectura(tipo)
                 else:
                      print("Opcion invalida")
-        elif opcion == "6":
+        elif opcion == "4":
              siono = input("\nEsta seguro que ya estan cames,cares y avisos cargados? Reponda si/no")
              if siono == "si":
                 vincular()      
              else:
                 break
-        elif opcion == "7":
+        elif opcion == "5":
             print("Saliendo...")
             break
-        elif opcion == "8":
+        elif opcion == "6":
             while True:
                 limpiar_consola()
                 traer_consola_al_frente()  # Traer consola al frente cada vez que se muestra el menú      
